@@ -175,6 +175,9 @@ class Poloniex:
     def return_active_loans(self):
         return self.api_query('returnActiveLoans')
 
+    def return_lending_history(self, start, stop):
+        return self.api_query('returnLendingHistory', {'start': start, 'end': stop})
+
     # Returns your trade history for a given market, specified by the "currencyPair" POST parameter
     # Inputs:
     # currencyPair  The currency pair e.g. "BTC_XCP"
