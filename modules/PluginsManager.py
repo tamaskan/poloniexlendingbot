@@ -36,9 +36,14 @@ def init(cfg, api1, log1, notify_conf1):
         plugins.append(init_plugin(plugin_name))
 
 
-def on_bot_loop():
+def after_lending():
     for plugin in plugins:
-        plugin.on_bot_loop()
+        plugin.after_lending()
+
+
+def before_lending():
+    for plugin in plugins:
+        plugin.before_lending()
 
 
 def on_bot_exit():

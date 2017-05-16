@@ -20,10 +20,15 @@ class Plugin(object):
     def on_bot_init(self):
         self.log.log(self.__class__.__name__ + ' plugin started.')
 
-    # override this to run plugin loop code
-    def on_bot_loop(self):
+    # override this to run plugin loop code before lending
+    def before_lending(self):
+        pass
+
+    # override this to run plugin loop code after lending
+    def after_lending(self):
         pass
 
     # override this to run plugin stop code
+    # since the bot can be killed, there is not guarantee this will be called.
     def on_bot_stop(self):
         pass

@@ -19,8 +19,8 @@ class AccountStats(Plugin):
         self.init_db()
         self.update_history()
 
-    def on_bot_loop(self):
-        pass
+    def after_lending(self):
+        self.update_history()
 
     # noinspection PyAttributeOutsideInit
     def init_db(self):
@@ -29,14 +29,22 @@ class AccountStats(Plugin):
         self.db.commit()
 
     def update_history(self):
+        # timestamps are in UTC
+        last_time_stamp = "2009-01-03 18:15:05"
         cursor = self.db.execute(DB_GET_LAST_TIMESTAMP)
-        self.log.log(cursor.fetchone()[0])
+        row = cursor.fetchone()
+        if row[0] is not None:
+            last_time_stamp = row[0]
+        self.log.log(last_time_stamp)
         cursor.close()
 
-        history = self.api.return_lending_history(Poloniex.create_time_stamp("2017-05-13 00:00:00")
-                                                  , Poloniex.create_time_stamp("2017-05-15 00:00:00"))
-        for loan in history:
-            self.db.execute(DB_INSERT, [loan['id'], loan['open'], loan['close'], loan['duration'], loan['interest'],
-                                        loan['rate'], loan['currency'], loan['amount'], loan['earned'], loan['fee']])
+        history = self.api.return_lending_history(Poloniex.create_time_stamp(last_time_stamp)
+                                                  , sqlite3.time.time(), 10000000)
+        loans = []
+        for loan in reversed(history):
+            loans.append(
+                [loan['id'], loan['open'], loan['close'], loan['duration'], loan['interest'],
+                 loan['rate'], loan['currency'], loan['amount'], loan['earned'], loan['fee']])
+        self.db.executemany(DB_INSERT, loans)
         self.db.commit()
-        self.log.log(str(len(history)))
+        self.log.log(str(len(loans)))
