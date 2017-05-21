@@ -6,7 +6,7 @@ import modules.Poloniex as Poloniex
 import sqlite3
 
 BITCOIN_GENESIS_BLOCK_DATE = "2009-01-03 18:15:05"
-
+DAY_IN_SEC = 86400
 DB_DROP = "DROP TABLE IF EXISTS history"
 DB_CREATE = "CREATE TABLE IF NOT EXISTS history(" \
             "id INTEGER UNIQUE, open TIMESTAMP, close TIMESTAMP," \
@@ -23,6 +23,8 @@ DB_GET_24HR_EARNED = "SELECT sum(earned) as total_earned, currency FROM 'history
 
 
 class AccountStats(Plugin):
+    last_notification = 0
+
     def on_bot_init(self):
         super(AccountStats, self).on_bot_init()
         self.init_db()
@@ -102,6 +104,9 @@ class AccountStats(Plugin):
             self.log.log_error('AccountStats DB isn\'t ready.')
             return
 
+        if self.last_notification != 0 and self.last_notification + DAY_IN_SEC > sqlite3.time.time():
+            return
+
         cursor = self.db.execute(DB_GET_24HR_EARNED)
         output = ''
         for row in cursor:
@@ -113,6 +118,7 @@ class AccountStats(Plugin):
             output += str(row[0]) + ' ' + str(row[1]) + ' in total\n'
         cursor.close()
         if output != '':
+            self.last_notification = sqlite3.time.time()
             output = 'Earnings:\n----------\n' + output
             self.log.notify(output, self.notify_config)
             self.log.log(output)
