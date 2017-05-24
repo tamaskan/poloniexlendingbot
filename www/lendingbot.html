@@ -26,10 +26,13 @@
 
     <!-- Bootstrap Core CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- jQuery Version 1.12.2 -->
-    <script src="https://code.jquery.com/jquery-1.12.2.min.js"></script>
-
+	
+    <!-- jQuery Version 3.2.1 -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    
+	<!-- Moment.js 2.18.1 -->
+	<script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+	
     <!-- Bootstrap Core JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
@@ -37,9 +40,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
 
+	<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet"> 
+	
+	<!-- Cryptocoin icons -->
+    <link rel="stylesheet" href="cryptocoins.css">
+
+    <!-- Cryptocoin colors -->
+    <link rel="stylesheet" href="cryptocoins-colors.css">
+	
     <script src="lendingbot.js?version=2" ></script>
 
     <style>
+	    *,body {
+		    font-family: 'Roboto Condensed', sans-serif;
+		}
+	
+	    .glyphicon-chevron-down,.glyphicon-chevron-up {
+		    float:right
+		}
+	
         .brand-margin{
             margin-top:4px;
             margin-bottom:4px
@@ -77,6 +96,10 @@
         #input-file {
             display: none;
         }
+		
+		div.alert{
+		  padding:0px;margin-bottom:0px
+		}
     </style>
 
 </head>
@@ -122,31 +145,74 @@
     </nav>
 
     <input type="file" id="input-file" name="file" onchange="handleLocalFile(this.files[0])" />
+ <div class="container" style="padding-top:70px">
 
-    <div class="container" style="padding-top:50px">
-        <div class="row" style="overflow-x:auto">
-            <table class="table table-responsive">
-                <thead>
-                    <tr>
-                        <th style="vertical-align: text-top;">Status</th><th style="vertical-align: text-top;" id="status">N/A</th>
-                    </tr>
-                    <tr>
-                        <td style="vertical-align: text-top;padding:0px;" colspan="2" >
-                            <table class="table table-striped table-responsive"
-                                style="margin:0px"
-                                id="detailsTable" >
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th colspan="2">Log (Reversed ordered):</th>
-                    </tr>
-                </thead>
-                <tbody id="logtable">
-                </tbody>
-            </table>
-        </div>
-    </div>
+	<!-- Coin Overview -->
+  <div class="panel panel-default">
+  
+  <div class="panel-heading">Coin Overview
+	  <span class="glyphicon glyphicon-chevron-down toggle" aria-hidden="true" style="display:none"></span>
+	  <span class="glyphicon glyphicon-chevron-up toggle"   aria-hidden="true" ></span>
+  </div>
+  <div class="panel-body">
+  <!--<p style="vertical-align: text-top;" id="status">N/A</p>-->
+      <table class="table table-striped table-responsive" style="margin:0px" id="detailsTable" ></table>
+  </div>
+  <!-- Table -->
+  </div>
+  
+  <div class="row">
+	  <div class="col-md-6">
+		  <div class="panel panel-default">
+		  <!-- Opened Loans -->
+		  <div class="panel-heading">Opened Loans
+			  <span class="glyphicon glyphicon-chevron-down toggle" aria-hidden="true"></span>
+			  <span class="glyphicon glyphicon-chevron-up toggle"   aria-hidden="true" style="display:none"></span>
+		  </div>
+		  <div class="panel-body" style="display:none">
+			  <table class="table table-responsive" id="placed"></table>
+		  </div>
+		  <!-- Table -->
+		  
+		  </div>
+	  </div>
+	  
+	  <div class="col-md-6">
+		  <div class="panel panel-default">
+		  <!-- Closed Loans -->
+		  <div class="panel-heading">Closed Loans
+			  <span class="glyphicon glyphicon-chevron-down toggle" aria-hidden="true"></span>
+			  <span class="glyphicon glyphicon-chevron-up toggle"   aria-hidden="true" style="display:none"></span>
+		  </div>
+		  <div class="panel-body" style="display:none">
+			  <table class="table table-responsive" id="closed"></table>
+		  </div>
+		  <!-- Table -->
+		  </div>
+	  </div>
+  </div>
+  
+  <div class="panel panel-default">
+  <!-- Log -->
+  <div class="panel-heading">Log (Reversed ordered): 
+  <span class="glyphicon glyphicon-chevron-down toggle" aria-hidden="true"></span>
+  <span class="glyphicon glyphicon-chevron-up toggle"   aria-hidden="true" style="display:none"></span>
+  </div>
+  <!-- Table -->
+	  <div class="panel-body" style="display:none">
+		<button class="btn btn-success" type="button">Success  <span class="badge" id="successnumber"></span></button>
+		<button class="btn btn-info"    type="button">Canceled <span class="badge" id="cancelednumber"></span></button>
+		<button class="btn btn-danger"  type="button">Error    <span class="badge" id="errornumber"></span></button>
+		<button class="btn infobutton"  type="button">Info     <span class="badge" id="infonumber"></span></button>
+		
+	    <table class="table table-responsive" style="margin-top:10px">
+		  <tbody id="logtable">
+	    </table>
+		
+	  </div>
+  </div>
+ </div>
+                    
     <!-- /.container -->
 
 
@@ -162,7 +228,7 @@
                 <div class="modal-body">
                     <form>
                         <div class="form-group">
-                            <label for="refresh_interval">Page Refresh interval (10-60 seconds)</label>
+                            <label for="refresh_interval">Page Refresh interval (10-3600 seconds)</label>
                             <input type="number" class="form-control" id="refresh_interval" placeholder="(10-60)">
                         </div>
 
@@ -221,7 +287,12 @@
                                 <input value="onlyfee" type="radio" name="effRateMode"> Fee Only
                             </label>
                         </div>
-
+                        
+						<div class="form-group">
+                            <h5><a href="https://momentjs.com/docs/#/displaying/format/" target="_blank">Date Format</a></h5>
+							<input placeholder="YYYY-MM-DD h:mm:ss" type="text" id="dateformat">
+					    </div>
+						
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -231,6 +302,7 @@
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+	
 </body>
 
 </html>
