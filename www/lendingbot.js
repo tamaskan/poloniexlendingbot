@@ -25,7 +25,7 @@ var displayUnit = BTC;
 var btcDisplayUnitsModes = [BTC, mBTC, Bits, Satoshi];
 
 // Date Format
-	var dateformat = localStorage.getItem('dateformat') || "DD. M. YYYY H:mm:ss ";
+	var dateformat = localStorage.getItem('dateformat') || 'DD. M. YYYY H:mm:ss ';
 	
 //Account value
     var totalvalue = 0;
@@ -215,15 +215,22 @@ function updateRawValues(rawData){
             var compoundRateText = makeTooltip("Compound rate, the result of reinvesting the interest.", "Comp.");
             var displayCurrency = currency == 'BTC' ? displayUnit.name : currency;
 			
-            var lentStr = '<div class="progress" style="margin-bottom:20px"><div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+printFloat(lentPerc, 2)+'" aria-valuemin="0" aria-valuemax="100" style="width:'+printFloat(lentPerc, 2)+'%">'+printFloat(lentPerc, 2)+'</div></div><p style="text-align:center">Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + mincoincheck(displayCurrency,printFloat(totalCoins * btcMultiplier, 4)) + ' (' + printFloat(lentPerc, 2) + '%)</p>';
+			if (localStorage.getItem(displayCurrency) === null) {localStorage.setItem(displayCurrency,printFloat(totalCoins * btcMultiplier, 5))}		
+			var coinearnings = printFloat(totalCoins * btcMultiplier, 5) - localStorage.getItem(displayCurrency);
+			
+			
+            var lentStr = '<div class="progress" style="margin-bottom:20px"><div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+printFloat(lentPerc, 2)+'" aria-valuemin="0" aria-valuemax="100" style="width:'+printFloat(lentPerc, 2)+'%">'+printFloat(lentPerc, 2)+'</div></div><p style="text-align:center">Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + mincoincheck(displayCurrency,printFloat(totalCoins * btcMultiplier, 4)) + ' (' + printFloat(lentPerc, 2) + '%)</p><p style="text-align:center">Earned ' + coinearnings +' <i class="cc ' + displayCurrency + '"></i></p>';
 			
 			if (totalCoins != maxToLend) {
                 lentStr += ' <b>Total</b><br/>Lent ' + printFloat(lentSum * btcMultiplier, 4) + ' of ' + printFloat(maxToLend * btcMultiplier, 4) + ' (' + printFloat(lentPercLendable, 2) + '%) <b>Lendable</b>';
             }
 
             
-			
-            var currencyStr = "<i class='cc " + displayCurrency + "'></i> " + displayCurrency + ' <span class="glyphicon glyphicon-chevron-down" onClick="coindetails(this)" aria-hidden="true" ></span><span class="glyphicon glyphicon-chevron-up " onClick="coindetails(this)" aria-hidden="true" style="display:none"></span>';
+			if (lentSum > 0) {
+               var currencyStr = "<i class='cc " + displayCurrency + "'></i> " + displayCurrency + ' <span class="glyphicon glyphicon-chevron-down" onClick="coindetails(this)" aria-hidden="true" ></span><span class="glyphicon glyphicon-chevron-up " onClick="coindetails(this)" aria-hidden="true" style="display:none"></span>';
+			} else {
+			   var currencyStr = "<i class='cc " + displayCurrency + "'></i> " + displayCurrency;	
+			}
             if(!isNaN(highestBidBTC) && earningsOutputCoin != currency) {
 				var coinvalue = 'Total: ' + Math.round(prettyFloat(earningsOutputCoinRate * highestBidBTC / btcMultiplier , 4) * printFloat(totalCoins * btcMultiplier, 4)) + ' ' + earningsOutputCoin;
                 currencyStr += "<br/>1 "+ displayCurrency + " = " + prettyFloat(earningsOutputCoinRate * highestBidBTC / btcMultiplier , 2)  + ' ' + earningsOutputCoin + '<br/>' +coinvalue;
