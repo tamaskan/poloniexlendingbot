@@ -216,7 +216,6 @@ function updateRawValues(rawData){
             var lentStr = '<div class="progress" style="margin-bottom:20px"><div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+printFloat(lentPerc, 2)+'" aria-valuemin="0" aria-valuemax="100" style="width:'+printFloat(lentPerc, 2)+'%">'+printFloat(lentPerc, 2)+'</div></div><p style="text-align:center">Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + mincoincheck(displayCurrency,printFloat(totalCoins * btcMultiplier, 4)) + ' (' + printFloat(lentPerc, 2) + '%)</p>';
                        
             if (lentSum > 0) {
-               var currencyStr = "<i class='cc " + displayCurrency + "'></i> " + displayCurrency + ' <span class="glyphicon glyphicon-chevron-down" onClick="coindetails(this)" aria-hidden="true" ></span><span class="glyphicon glyphicon-chevron-up " onClick="coindetails(this)" aria-hidden="true" style="display:none"></span>';
             } else {
                var currencyStr = "<i class='cc " + displayCurrency + "'></i> " + displayCurrency;   
             }
@@ -247,7 +246,13 @@ function updateRawValues(rawData){
             // print coin earnings
             var row = table.insertRow();
             row.className = 'coindetails';
-            row.style.display = "none";
+            
+            if(localStorage.getItem(displayCurrency) == "true") {
+               row.style.display = "";   
+            } else {
+               row.style.display = "none";
+            }
+            
             if (lentSum > 0) {
                 var cell1 = row.appendChild(document.createElement("td"));
                 cell1.innerHTML = "<span class='hidden-xs'>"+ displayCurrency +"<br/></span>Est. "+ compoundRateText +"<br/>Earnings";
@@ -504,7 +509,8 @@ function bsNavbarBugWorkaround() {
     });
 }
 
-function coindetails(param) {
+function coindetails(param,coin,status) {
+        localStorage.setItem(coin,status);
         $(param).parent().parent().next('.coindetails').toggle();
         $(param).hide();
         $(param).siblings('.glyphicon').toggle();
