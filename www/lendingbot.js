@@ -216,6 +216,9 @@ function updateRawValues(rawData){
             var lentStr = '<div class="progress" style="margin-bottom:20px"><div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="'+printFloat(lentPerc, 2)+'" aria-valuemin="0" aria-valuemax="100" style="width:'+printFloat(lentPerc, 2)+'%">'+printFloat(lentPerc, 2)+'</div></div><p style="text-align:center">Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + mincoincheck(displayCurrency,printFloat(totalCoins * btcMultiplier, 4)) + ' (' + printFloat(lentPerc, 2) + '%)</p>';
                        
             if (lentSum > 0) {
+               var detaildown = (localStorage.getItem(displayCurrency) == "true") ? 'none' : '';
+               var detailup = (localStorage.getItem(displayCurrency) == "true") ? '' : 'none';
+               var currencyStr = "<i class='cc " + displayCurrency + "'></i> " + displayCurrency + ' <span class="glyphicon glyphicon-chevron-down" onClick="coindetails(this,\''+displayCurrency+'\',\'true\')" aria-hidden="true" style="display:'+detaildown+'"></span><span class="glyphicon glyphicon-chevron-up " onClick="coindetails(this,\''+displayCurrency+'\',\'false\')" aria-hidden="true" style="display:'+detailup+'"></span>';
             } else {
                var currencyStr = "<i class='cc " + displayCurrency + "'></i> " + displayCurrency;   
             }
