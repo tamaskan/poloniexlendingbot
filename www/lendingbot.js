@@ -25,28 +25,23 @@ var displayUnit = BTC;
 var btcDisplayUnitsModes = [BTC, mBTC, Bits, Satoshi];
 
 // Date Format
-    var dateformat = localStorage.getItem('dateformat') || 'DD. M. YYYY H:mm:ss ';
- 
-//Account value
-    var totalvalue = 0;
-    var coinarray = [];
-//Min Coins based on https://github.com/BitBotFactory/poloniexlendingbot/issues/347
-    var items = [['BTC','BTS','CLAM','DASH','DOGE','ETH','FCT','LTC','MAID','STR','XMR','XRP'],[0.00019124,10,10,0,100,0,100,0,10,100,0,100]];
+var dateformat = localStorage.getItem('dateformat') || 'DD. M. YYYY H:mm:ss ';
+var Jsondata;
 
-//vermögen + customizable bars http://www.chartjs.org/docs/latest/charts/bar.html https://ip.bitcointalk.org/?u=https%3A%2F%2Fpreview.ibb.co%2FepdNav%2FFlyer.jpg&t=577&c=Ut0cQQfdlw6HkQ 
+//Chart Initialisation
+var InterestDoughnutChart = new Chart(interestChart, {
+    type: 'doughnut',
+    data: {datasets: [{data: []}],labels: []}
+});
 
-$.get( "https://blockchain.info/ticker?cors=true", function( data ) {
-  $.each(data,function(v,m){
-	  $('#currencydropdown').append('<a class="dropdown-item" href="#" data-name="'+v+'" data-value="'+m['last']+'">'+v+'</a>');
-  });
-  
-});
-$(document.body).on('click',".dropdown-item",function(){
-	localStorage.setItem("displayCurrency",$(this).data("name"));
-	localStorage.setItem("displayCurrencyRate",$(this).data("value"));
-	window.location.reload(true);
-});
+var DoughnutChart = new Chart(capitalChart, {
+    type: 'doughnut',
+    data: {datasets: [{data: []}],labels: []}
+});	
 	
+//Min Coins based on https://github.com/BitBotFactory/poloniexlendingbot/issues/347
+var items = [['BTC','BTS','CLAM','DASH','DOGE','ETH','FCT','LTC','MAID','STR','XMR','XRP'],[0.00019124,10,10,0,100,0,100,0,10,100,0,100]];
+
 function mincoincheck(coin,value){
     for (var i = items[0].length - 1; i >=0; i--) {
      if(items[0][i] == coin) {
@@ -55,92 +50,44 @@ function mincoincheck(coin,value){
          }
     }
 }
-
-
-    var InterestDoughnutChart = new Chart(interestChart, {
-    type: 'doughnut',
-    data: {datasets: [{data: []}],labels: []},
-	 options: {
-	   legend: {
-            display: false,
-	   }
-	 }
-    });
-
-
-    var DoughnutChart = new Chart(capitalChart, {
-    type: 'doughnut',
-    data: {datasets: [{data: []}],labels: []},
-	 options: {
-	   legend: {
-            display: false,
-	   }
-	 }
-    });
-balance = "";
+   
 function createinterest(){
-	 balance = "";
-	 $('.cardoverview .cardclone').remove();
-	$.get( "https://poloniex.com/public?command=returnTicker", function( data ) {
-     $.each(data,function(k,v){
-	  if (k.indexOf('BTC_') >=0) {
-		  var coin = k.replace("BTC_","");
-		  var highbid = v["highestBid"];
-		  //console.log(coin,value);
-		  $.each(coinarray,function(key,value){
-			  if (value["coin"] == coin) {
-				  coinarray[key]["highestBid"] = highbid;
-				  coinarray[key]["balance"] = (localStorage.getItem('displayCurrencyRate') * (coinarray[key]["totalcoins"] * coinarray[key]["highestBid"])).toFixed(2) ;
-				  coinarray[key]["interestcoin"] = "TBD";
-				  coinarray[key]["interestpercent"] = "TBD";
-				  coinarray[key]["interest"] = "TBD";
-				  balance = +balance + +coinarray[key]["balance"];
-				  var template = $("#cardtemplate").clone().removeAttr("style","id").addClass("cardclone");  
-				  $('.coinname',template).html(coin);
-				  $('.cardcoinlent',template).html("TBD");
-				  $('.cardcointotal',template).html(coinarray[key]["balance"]);
-				  $('.cardearned',template).html(coinarray[key]["interestcoin"]);
-				  $('.cc',template).addClass(coin);
-				  
-				  $('.cardoverview').append(template);
-				  //clone, then update
-			  }
-		  })
-	  }
-	$('#totalcash').html((+balance).toFixed(2));
 	
-	
-	 
-	//coin + rate table  https://poloniex.com/public?command=returnLoanOrders&currency=DASH  $('#cointable tbody').empty(); $('#cointable').append('<tr><td>'+coinicon(coin)+'</td><td>'+value["highestBid"]+'</td></tr>'); 
-	// max-min * 365
-	 
-	 //gesamt vermögen
-	 // gesamt zinsen
-     });
-	});
-	return coinarray;
-}
+	/*var interestarray = [];
+$.each(coinarray,function(k,v){
+	$.get( "https://poloniex.com/public?command=returnLoanOrders&currency="+v["coin"], function( data ) {
+		var amount = 0;
+		var count = 0;
+		$.each(data["offers"],function(key,value){
+			amount = value["rate"];
+			count++;
+			interestarray.push([v["coin"],amount/count,(amount/count)*365])
+		})
+		
+	})
+})
+console.log(interestarray);*/
 
-coins = [];
-coinnames = [];
+	//return coinarray;
+}
 
 function updatedonut(){
 	
 	   coins = [];
 	   coinnames = [];
 	   coincolors = [];
-	   $.each(coinarray,function(key,value){
-		   coins.push(value["totalcoins"]);
-		   coinnames.push(value["coin"]);
+	   
+	   $.each(Jsondata,function(key,value){
+		   coins.push(value["totalCoins"]);
+		   coinnames.push(key);
 		   
-		   var $inspector = $("<i class='cc'>").css('display', 'none').addClass(value["coin"]);
+		   var $inspector = $("<i class='cc'>").css('display', 'none').addClass(key);
 			$("body").append($inspector); 
 			try {
 				coincolors.push($inspector.css('color'));
 			} finally {
 				$inspector.remove(); 
-			}
-		   
+			}   
 	   })
 	   
 	   DoughnutChart.data.datasets[0].data = coins;
@@ -148,14 +95,14 @@ function updatedonut(){
 	   DoughnutChart.data.datasets[0].backgroundColor = coincolors;
 	   DoughnutChart.update();
 	   
-	   InterestDoughnutChart.data.datasets[0].data = createinterest();
+	   InterestDoughnutChart.data.datasets[0].data = [];
 	   InterestDoughnutChart.data.labels = coinnames;
 	   InterestDoughnutChart.data.datasets[0].backgroundColor = coincolors;
 	   InterestDoughnutChart.update();
 
 	}
 
-function notification(string){
+function notification(string,type){
 	
 	if(localStorage.getItem('notification') == "push") {
         Push.create("Loan placed", {
@@ -171,8 +118,12 @@ function notification(string){
         toastr.options = {
            "positionClass": "toast-top-right"
         }
-	   toastr.success(string); //loan placed
-	   //toastr.warning('My name is Inigo Montoya. You killed my father, prepare to die!') //loading-warning
+	if(type == "success"){
+		toastr.success(string);
+	} else {
+		toastr.warning(string) 
+	}
+	      
     }
 	
 } 
@@ -187,12 +138,85 @@ function coinicon(string){
     }
     return output + string;
 }   
-    
+
+function shorttimestring(timestring){
+		var time = moment(timestring,'YYYY-MM-DD h:mm:ss').format(dateformat);
+		var shorttime;
+		
+		$.each(["months","weeks","days","hours","minutes","seconds"],function(key,value){
+			if (moment().diff(moment(timestring,'YYYY-MM-DD h:mm:ss'),value) > 1) {
+               shorttime = '<a data-toggle="tooltip" data-date="'+timestring+'" class="plb-tooltip" title="' + time + '">' + moment().diff(moment(timestring,'YYYY-MM-DD h:mm:ss'),value) + ' ' + value + ' ago</a>';
+			   return false;
+            }
+		})
+        
+		return shorttime;
+}
+ 
 function updateJson(data) {
+	
+	Jsondata = data["raw_data"];
+	
+	$.each(Jsondata,function(key,value){
+		Jsondata[key]["totalCoins"] = value["totalCoins"] || value["maxToLend"];
+		//json get find missing highestBid -> table eintragen
+		if(!value["highestBid"]){/*console.log('ohoh');*/}
+		Jsondata[key]["balance"] = printFloat((localStorage.getItem('displayCurrencyRate') * (Jsondata[key]["totalCoins"] * value["highestBid"])),2);
+		
+	})
+	
+	$.get( "https://poloniex.com/public?command=returnTicker", function( data2 ) {
+     $.each(data2,function(k,v){
+	  if (k.indexOf('BTC_') >=0) {
+		  var coin = k.replace("BTC_","");
+		  var highbid = v["highestBid"];
+		  $.each(Jsondata,function(key,value){
+			  if (key == coin) {
+				  Jsondata[key]["highestBid"] = highbid;
+				  Jsondata[key]["interestcoin"] = "TBD";
+				  Jsondata[key]["interestpercent"] = "TBD";
+				  Jsondata[key]["interest"] = "TBD";
+				  var template = $("#cardtemplate").clone().removeAttr("style").addClass("cardclone clone"+key);  
+				  $('.coinname',template).html(coin);
+				  $('.cardcoinlent',template).html(Jsondata[key]["totalCoins"]);
+				  $('.cardcointotal',template).html((highbid * Jsondata[key]["totalCoins"] * localStorage.getItem('displayCurrencyRate')) + ' ' + localStorage.getItem('displayCurrency'));
+				  $('.cardearned',template).html(Jsondata[key]["interestcoin"]);
+				  $('.cc',template).addClass(coin);
+				  $('.collapseidhref a',template).attr('href', '#'+coin+'collapse');
+				  $('.collapseid',template).attr('id', coin+'collapse');
+				  
+				  if($('.cardclone').length == (Object.keys(Jsondata).length -1)){
+					   $('.clone'+key +' .cardcoinlent').html(Jsondata[key]["totalcoins"]);
+					   $('.clone'+key +' .cardcointotal').html(Jsondata[key]["balance"] + ' ' + localStorage.getItem('displayCurrency'));
+					   $('.clone'+key +' .cardearned').html(Jsondata[key]["interestcoin"]);
+					   $('.updatetime').html(shorttimestring(data.last_update));
+				  }
+				  else {
+					 $('.cardoverview').append(template);
+					 $('.updatetime').html(shorttimestring(data.last_update));
+				  }
+				  
+			  }
+		  })
+	  }
+	$('#totalcash').html(Jsondata["accountSummary"] + ' ' + localStorage.getItem('displayCurrency'));
+
+     });
+	});
+	
+	
+	
+	
+	$('.displayCurrency').each(function(){
+		$(this).html(($(this).html().replace("$",localStorage.getItem("displayCurrency"))));
+	})
+	
 	if((data.last_status).length > 0){
 		$('.updated').css("color","green").prop('title',moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
+		notification("Update","success");
 	} else {
 		$('.updated').css("color","red").prop('title',data.last_status + ' ' + moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
+		notification("Update","warning");
 	}  
 	
     var rowCount = data.log.length;
@@ -204,23 +228,17 @@ function updateJson(data) {
 	
 	$('#coinstatustable tbody').empty();
 	
-	$.each(coinarray,function(key,value){
-		$('#coinstatustable').append('<tr><td>'+coinicon(value["coin"])+'</td><td>'+value["totalcoins"]+'</td><td>'+value["balance"]+'</td><td>'+value["interestcoin"]+'</td><td>'+value["interestpercent"]+'</td><td>'+value["interest"]+'</td></tr>');
-	})
+	$.each(Jsondata,function(key,value){
+	  $('#coinstatustable').append('<tr><td>'+coinicon(key)+'</td><td>'+value["totalCoins"]+'</td><td>'+value["balance"]+'</td><td>'+value["interestcoin"] +'</td><td>'+value["interestpercent"]+'</td><td>'+value["interest"]+'</td></tr>');
+	});
 	
-	
-    //canceled vergessen + farbige zeilen??? https://datatables.net/examples/advanced_init/row_callback.html + datesorting mit abkürzung
+    //farbige zeilen??? https://datatables.net/examples/advanced_init/row_callback.html
+	var regexarray = [/(\d{4}[.-]\d{2}[.-]\d{2}[ ]\d{2}[:]\d{2}[:]\d{2})/,/[ ]\d{0,20}[.]\d{0,20}[ ]([A-Z]{0,10})[ ]/,/[ ](\d{0,20}[.]\d{0,20})[ ]/,/\bfor?\b[ ](\d{0,3}[ ]\bdays?\b)/,/(\d{0,4}[.]\d{0,8}[%])/];
     for (var i = rowCount - 1; i >=0; i--) {
+			
+        
+        var timestring = shorttimestring(((data.log[i]).match(regexarray[0]))[1]);
 		
-        var time = moment((data.log[i]).substring(0,19),'YYYY-MM-DD h:mm:ss').format(dateformat);
-        
-        if (moment().diff(moment((data.log[i]).substring(0,19),'YYYY-MM-DD h:mm:ss'),'days') < 1) {
-            var timestring = '<a data-toggle="tooltip" class="plb-tooltip" title="' + time + '">' + moment().diff(moment((data.log[i]).substring(0,19),'YYYY-MM-DD h:mm:ss'),'hours') + ' hours ago</a>';
-        }
-        else {
-            var timestring = '<a data-toggle="tooltip" class="plb-tooltip" title="' + time + '">' + moment().diff(moment((data.log[i]).substring(0,19),'YYYY-MM-DD h:mm:ss'),'days') + ' days ago</a>';
-        }
-        
         var message = (data.log[i]).substring(20);
         if (data.log[i].indexOf("Error") >= 0) {
             message = '<div class="alert alert-danger" role="alert">' + message + '</div>';
@@ -232,16 +250,20 @@ function updateJson(data) {
             message = '<div class="alert alert-success" role="alert">' +  coinicon(message) + '</div>';
             successnumber++;
 			
-			var regexarray = [/(\d{4}[.-]\d{2}[.-]\d{2}[ ]\d{2}[:]\d{2}[:]\d{2})/,/[ ]\d{0,20}[.]\d{0,20}[ ]([A-Z]{0,10})[ ]/,/[ ](\d{0,20}[.]\d{0,20})[ ]/,/\bfor?\b[ ](\d{0,3})[ ]/,/(\d{0,4}[.]\d{0,8}[%])/];
+			
 			var resultarray = [];
 			$.each(regexarray,function(index,value){
 				resultarray.push(((data.log[i]).match(regexarray[index]))[1]);
 			});
 			
-			dataSet.push([resultarray[0],coinicon(resultarray[1]),resultarray[2],resultarray[3],resultarray[4]]);
+			dataSet.push([shorttimestring(resultarray[0]),coinicon(resultarray[1]),resultarray[2],resultarray[3],resultarray[4]]);
 			
 			logdataSet.push(["Success",timestring,message]);
         }
+		else if (data.log[i].indexOf("Canceling") >= 0) {
+			message = '<div class="alert alert-info" role="alert">' + message + '</div>';
+            cancelednumber++;
+		}
         else {
             message = '<div class="alert alert-custom" role="alert">' +  coinicon(message) + '</div>';
 			logdataSet.push(["Info",timestring,message]);
@@ -263,26 +285,28 @@ function updateJson(data) {
     updateRawValues(data.raw_data);
 	
 	if ( $.fn.dataTable.isDataTable( '#openloans' ) ) {
-    mydatatable = $('#openloans').dataTable();
+       mydatatable = $('#openloans').dataTable();
     }
     else {
-    mydatatable = $('#openloans').dataTable({responsive: true});
+       mydatatable = $('#openloans').dataTable({responsive: true});
     }
 
     mydatatable.fnClearTable();
     mydatatable.fnAddData(dataSet);
 	
 	if ( $.fn.dataTable.isDataTable( '#logtable' ) ) {
-    logtable = $('#logtable').dataTable();
+       logtable = $('#logtable').dataTable();
     }
     else {
-    logtable = $('#logtable').dataTable({responsive: true});
+       logtable = $('#logtable').dataTable({responsive: true, createdRow: function( row, data, dataIndex ) {
+		  $( row ).find('td:eq(1) a').attr('data-order',$( row ).find('td:eq(1) a').attr('data-date'));
+		  //$( row ).find('td:eq(1) a').attr('data-order',$( row ).find('td:eq(1) a').attr('data-date'));
+        }});
     }
 
 	logtable.fnClearTable();
     logtable.fnAddData(logdataSet);
-	
-	notification("Update");
+
 }
 
 function updateOutputCurrency(outputCurrency){
@@ -315,15 +339,13 @@ function printFloat(value, precision) {
     return result = isNaN(result) ? '0' : result.toFixed(precision);
 }
 
-coinarray = [];
-
 function updateRawValues(rawData){
     var table = document.getElementById("detailsTable");
     table.innerHTML = "";
     var currencies = Object.keys(rawData);
     var totalBTCEarnings = {};
-    totalvalue = 0;
-	coinarray = [];
+
+	$('#cointable tbody').empty();
     for (var keyIndex = 0; keyIndex < currencies.length; ++keyIndex)
     {
         var currency = currencies[keyIndex];
@@ -334,7 +356,6 @@ function updateRawValues(rawData){
         var maxToLend = parseFloat(rawData[currency]['maxToLend']);
         var highestBidBTC = parseFloat(rawData[currency]['highestBid']);
 		
-        coinarray.push({coin: currency, totalcoins:totalCoins || lentSum})
         if (currency == 'BTC') {
             // no bids for BTC provided by poloniex
             // this is added so BTC can be handled like other coins for conversions
@@ -345,10 +366,7 @@ function updateRawValues(rawData){
         if (!isNaN(averageLendingRate) && !isNaN(lentSum) || !isNaN(totalCoins))
         {
 
-            // cover cases where totalCoins isn't updated because all coins are lent
-            if (isNaN(totalCoins) && !isNaN(lentSum)) {
-                totalCoins = lentSum;
-            }
+            
             var rate = +averageLendingRate  * 0.85 / 100; // 15% goes to Poloniex fees
 
             var earnings = '';
@@ -395,6 +413,7 @@ function updateRawValues(rawData){
             var compoundRateText = makeTooltip("Compound rate, the result of reinvesting the interest.", "Comp.");
             var displayCurrency = currency == 'BTC' ? displayUnit.name : currency;
                
+			$('#cointable').append('<tr><td>'+coinicon(currency)+'</td><td>'+ printFloat(yearlyRateComp, 2) +'</td></tr>');  
             //placeholder for https://github.com/BitBotFactory/poloniexlendingbot/pull/349   
             //<p style="text-align:center">Earned ' + [API-Response] +' <i class="cc ' + displayCurrency + '"></i></p>
             
@@ -410,7 +429,6 @@ function updateRawValues(rawData){
             if(!isNaN(highestBidBTC) && earningsOutputCoin != currency) {
                 var coinvalue = 'Total: ' + Math.round(prettyFloat(earningsOutputCoinRate * highestBidBTC / btcMultiplier , 4) * printFloat(totalCoins * btcMultiplier, 4)) + ' ' + earningsOutputCoin;
                 currencyStr += "<br/>1 "+ displayCurrency + " = " + prettyFloat(earningsOutputCoinRate * highestBidBTC / btcMultiplier , 2)  + ' ' + earningsOutputCoin + '<br/>' +coinvalue;
-                totalvalue += Math.round(prettyFloat(earningsOutputCoinRate * highestBidBTC / btcMultiplier , 4) * printFloat(totalCoins * btcMultiplier, 4));
             }
             var rowValues = [currencyStr, lentStr,
                 "<div class='inlinediv hidden-md-down' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
@@ -471,10 +489,11 @@ function updateRawValues(rawData){
         cell.style.verticalAlign = "text-top";
         cell = row.appendChild(document.createElement("th"));
         cell.setAttribute("colspan", 2);
-        cell.innerHTML = totalvalue + ' ' + earningsOutputCoin + '<br/>' + earnings;
+        cell.innerHTML = Jsondata["accountSummary"] + ' ' + earningsOutputCoin + '<br/>' + earnings;
     }
 	
 	updatedonut();
+
 }
 
 function handleLocalFile(file) {
@@ -750,6 +769,20 @@ $(document).ready(function () {
     if(activeTab){
         $('#navbarNav a[href="' + activeTab + '"]').tab('show');
     }
+	
+	jQuery(".switchradio").bootstrapSwitch();
+	
+	$.get( "https://blockchain.info/ticker?cors=true", function( data ) {
+     $.each(data,function(v,m){
+	  $('#currencydropdown').append('<a class="dropdown-item" href="#" data-name="'+v+'" data-value="'+m['last']+'">'+v+'</a>');
+     });
+    });
+	
+    $(document.body).on('click',".dropdown-item",function(){
+	   localStorage.setItem("displayCurrency",$(this).data("name"));
+	   localStorage.setItem("displayCurrencyRate",$(this).data("value"));
+	   window.location.reload(true);
+    });
 	
 });
 

@@ -24,7 +24,7 @@
 
     <title>Poloniex Lending Bot</title>
    
-	<!-- Bootstrap 4 -->
+	<!-- Bootstrap 4.0.0 -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
     
     <!-- toastr -->
@@ -37,13 +37,13 @@
     <link rel="stylesheet" href="cryptocoins.css">
     <link rel="stylesheet" href="cryptocoins-colors.css">
     	
-    <!-- Font-Awesome -->
+    <!-- Font-Awesome 4.7.0 -->
 	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 	
 	<!-- Bootstrap-Switch -->
 	<link href="bootstrap-switch.min.css" rel="stylesheet">
     
-	<!-- dataTables -->
+	<!-- dataTables 1.10.15 & responsive 2.1.1 -->
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap4.min.css"></style>
     <link rel="stylesheet" href="  https://cdn.datatables.net/responsive/2.1.1/css/responsive.dataTables.min.css"></style>
 	
@@ -145,7 +145,7 @@
   <div class="tab-pane active" id="home" role="tabpanel">
   
 	<table class="table table-sm" style="margin-top:10px" id="coinstatustable">
-		 <thead><th>Coin</th><th>Balance</th><th>Balance $</th><th>Interest</th><th>Interest %</th><th>Interest $</th></thead> <tbody>
+		 <thead><th>Coin</th><th>Balance</th><th class="displayCurrency">Balance $</th><th>Interest</th><th>Interest %</th><th class="displayCurrency">Interest $</th></thead> <tbody>
 		  </tbody>
 	</table>
 	
@@ -181,7 +181,7 @@
 	 <div class="card text-center">
 	    <div class="card-block">
            <h4 class="card-title" id="totalcash"></h4>
-		   <p class="card-text" style="margin-bottom:0">Vermögen</p>
+		   <p class="card-text" style="margin-bottom:0">Amount</p>
 	    </div>
 	 </div>
 	 
@@ -195,7 +195,8 @@
 	</div>
 	 
 	 <div class="card-columns cardoverview">
-      <div class="card  text-center " id="cardtemplate" style="display:none">
+	 <!-- https://stackoverflow.com/questions/33544083/aligning-bootstrap-cards-panels-of-different-height -->
+      <div class="card text-center " id="cardtemplate" style="display:none">
        <i class="cc" style="font-size:50px;text-align:center;margin-top:10px;display:block"></i>
        <div class="card-block">
         <h4 class="card-title coinname">Bitcoin</h4>
@@ -203,7 +204,7 @@
 		<p class="card-text cardcointotal" style="margin-bottom:0">Total: 144 USD (143.8 USD/DASH)</p>
 		<p class="card-text cardearned" style="margin-bottom:0">Earned: 0,00004 <i class="cc"></i> @ 0.00255%/0.94%</p>
 		
-		<div class="collapse" id="collapseExample">     
+		<div class="collapse collapseid">     
 		 <table class="table table-sm" style="margin-top:10px">
 		  <tbody>
 			<tr><td>Hour</td><td>0.00000106</td><td>0.00002545</td></tr>
@@ -219,9 +220,9 @@
        <div class="card-footer">
         <small class="text-muted flex">
 		<div class="row align-items-center">
-		   <div class="col"><a class="" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Details</a></div>
+		   <div class="col collapseidhref"><a data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Details</a></div>
 		    <div class="col"></div>
-		   <div class="col col-md-auto">Updated 3 mins ago</div>
+		   <div class="col col-md-auto updatetime">Updated 3 mins ago</div>
 		</div></small>
       </div>
      </div>
@@ -241,6 +242,7 @@
   <div class="tab-pane" id="logtab" role="tabpanel">
      <div class="card">
 	    <div class="card-header">
+		<!-- https://codepen.io/SitePoint/pen/VKxbmj/ -->
            <button class="btn btn-success" type="button">Success  <span class="badge" id="successnumber"></span></button>
            <button class="btn btn-info"    type="button">Canceled <span class="badge" id="cancelednumber"></span></button>
            <button class="btn btn-danger"  type="button">Error    <span class="badge" id="errornumber"></span></button>
@@ -362,6 +364,11 @@
                             <input placeholder="YYYY-MM-DD h:mm:ss" type="text" id="dateformat">
                         </div>
 						
+						<div class="form-group">
+                            <h5>Relative Dates</h5>
+							<input checked class="switchradio" type="checkbox" data-on-text="On" data-off-text="Off" onSwitchChange="function(event,state)">
+                        </div>
+						
                         <button type="button" class="btn btn-primary" onclick="doSave()">Save changes</button>
 						
                     </form>
@@ -442,7 +449,7 @@ pushbullet_deviceid = ujpah72o0sjAoRtnM0jb
 	<!-- jQuery Version 3.2.1 -->
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 	
-	<!-- dataTables -->
+	<!-- dataTables 1.10.15 -->
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
 	<script type="text/javascript" src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap4.min.js"></script>
 	<script type="text/javascript" src="https://cdn.datatables.net/responsive/2.1.1/js/dataTables.responsive.min.js"></script>
@@ -453,19 +460,19 @@ pushbullet_deviceid = ujpah72o0sjAoRtnM0jb
 	<!-- Toastr -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 	
-	<!-- Chart.js -->
+	<!-- Chart.js 2.6.0 -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.min.js"></script>
 	
-	<script src="lendingbot.js?version=2" ></script>
-	
-	<!-- Bootstrap v4 Tether -->
+	<!-- Bootstrap v4 Tether 1.4.0 -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
 	
 	<!-- Bootstrap v4 -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
 	
 	<!-- Bootstrap-Switch -->
-	<script src="bootstrap-switch.min.js"></script><script>jQuery(".switchradio").bootstrapSwitch();</script>
+	<script src="bootstrap-switch.min.js"></script>
+	
+	<script src="lendingbot.js?version=2" ></script>
 </body>
 
 </html>
