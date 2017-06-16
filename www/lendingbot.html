@@ -25,7 +25,7 @@
     <title>Poloniex Lending Bot</title>
    
 	<!-- Bootstrap 4.0.0 -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
+	<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" rel="stylesheet">
     
     <!-- toastr -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
@@ -34,8 +34,8 @@
 	<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet"> 
     
     <!-- Cryptocoin Font -->
-    <link rel="stylesheet" href="cryptocoins.css">
-    <link rel="stylesheet" href="cryptocoins-colors.css">
+    <link href="cryptocoins.css" rel="stylesheet">
+    <link href="cryptocoins-colors.css" rel="stylesheet">
     	
     <!-- Font-Awesome 4.7.0 -->
 	<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -44,10 +44,11 @@
 	<link href="bootstrap-switch.min.css" rel="stylesheet">
     
 	<!-- dataTables 1.10.15 & responsive 2.1.1 -->
-	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap4.min.css"></style>
-    <link rel="stylesheet" href="  https://cdn.datatables.net/responsive/2.1.1/css/responsive.dataTables.min.css"></style>
+	<link href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap4.min.css" rel="stylesheet"></style>
+    <link href="  https://cdn.datatables.net/responsive/2.1.1/css/responsive.dataTables.min.css" rel="stylesheet"></style>
 	
     <style>
+	.coindetails {color:black !important;}
 	.card {margin-bottom:20px}
         *,body {
             font-family: 'Roboto Condensed', sans-serif;
@@ -98,17 +99,24 @@
         div.alert{
           padding:0px;margin-bottom:0px
         }
+		
+		.lendingimage { height:32px;width:32px;}
+		.margintop {margin-top:10px;}
+		.marginbottom {margin-bottom:10px;}
+		.marginzero {margin-bottom:0;}
+		.chartstyle {width:300px;height:400px;}
+		.cardicon {font-size:50px;text-align:center;padding-top:1.25rem;display:block}
     </style>
 
 </head>
 
-<body class="container" style="margin-bottom:20px">
+<body class="container marginbottom">
 
 <nav class="navbar navbar-toggleable-md navbar-light">
   <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
   </button>
-  <a class="navbar-brand plb-tooltip updated" data-toggle="tooltip" title="" href="#"><img src="images/icon192.png" height="32" width="32" class="d-inline-block align-top">Poloniex Lending Bot</a>
+  <a class="navbar-brand plb-tooltip updated" data-toggle="tooltip" title="" href="#"><img src="images/icon192.png" class="d-inline-block align-top lendingimage">Poloniex Lending Bot</a>
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav">
       <li class="nav-item active">
@@ -144,20 +152,20 @@
 <div class="tab-content">
   <div class="tab-pane active" id="home" role="tabpanel">
   
-	<table class="table table-sm" style="margin-top:10px" id="coinstatustable">
+	<table class="table table-sm margintop" id="coinstatustable">
 		 <thead><th>Coin</th><th>Balance</th><th class="displayCurrency">Balance $</th><th>Interest</th><th>Interest %</th><th class="displayCurrency">Interest $</th></thead> <tbody>
 		  </tbody>
 	</table>
 	
- <div class="row justify-content-md-center" style="margin-top:10px">
+ <div class="row justify-content-md-center margintop">
   <div class="col">
-    <table class="table table-sm"  id="cointable">
-       <thead><th>Coin</th><th>Rate</th></thead>
+    <table class="table table-sm" id="cointable">
+       <thead><th>Coin</th><th>Ø Rate</th></thead>
 	   <tbody></tbody>
 	</table>
   </div>
   <div class="col col-md-auto">
-   <div class="chart-container" style="width:300px;height:400px">
+   <div class="chart-container chartstyle">
     <h4 style="text-align:center">Coins</h4>
     <canvas id="capitalChart"></canvas>
    </div>
@@ -181,39 +189,30 @@
 	 <div class="card text-center">
 	    <div class="card-block">
            <h4 class="card-title" id="totalcash"></h4>
-		   <p class="card-text" style="margin-bottom:0">Amount</p>
+		   <p class="card-text marginzero">Amount</p>
 	    </div>
 	 </div>
 	 
 	 <div class="card text-center">
 	    <div class="card-block">
            <h4 class="card-title" id="totalinterest"></h4>
-		   <p class="card-text" style="margin-bottom:0">Interest</p>
+		   <p class="card-text marginzero">Interest 24h</p>
 	    </div>
 	 </div>
 	 
 	</div>
 	 
 	 <div class="card-columns cardoverview">
-	 <!-- https://stackoverflow.com/questions/33544083/aligning-bootstrap-cards-panels-of-different-height -->
       <div class="card text-center " id="cardtemplate" style="display:none">
-       <i class="cc" style="font-size:50px;text-align:center;margin-top:10px;display:block"></i>
+       <i class="cc cardicon"></i>
        <div class="card-block">
-        <h4 class="card-title coinname">Bitcoin</h4>
-        <p class="card-text cardcoinlent" style="margin-bottom:0">Lent 0.9980 of 0.9980 (100.00%)</p>
-		<p class="card-text cardcointotal" style="margin-bottom:0">Total: 144 USD (143.8 USD/DASH)</p>
-		<p class="card-text cardearned" style="margin-bottom:0">Earned: 0,00004 <i class="cc"></i> @ 0.00255%/0.94%</p>
+        <h4 class="card-title coinname"></h4>
+        <p class="card-text cardcoinlent marginzero"></p>
+		<p class="card-text cardcointotal marginzero"></p>
+		<p class="card-text cardearned marginzero"><i class="cc"></i></p>
 		
 		<div class="collapse collapseid">     
-		 <table class="table table-sm" style="margin-top:10px">
-		  <tbody>
-			<tr><td>Hour</td><td>0.00000106</td><td>0.00002545</td></tr>
-		    <tr><td>Day</td><td>0.00000106</td><td>0.00002545</td></tr>
-		    <tr><td>Week</td><td>0.00000106</td><td>0.00002545</td></tr>
-		    <tr><td>Month</td><td>0.00000106</td><td>0.00002545</td></tr>
-		    <tr><td>Year</td><td>0.00000106</td><td>0.00002545</td></tr>
-		  </tbody>
-		 </table>      
+		 <table class="table table-sm coingriddetails margintop"></table>      
         </div>
 		
        </div>
@@ -222,18 +221,18 @@
 		<div class="row align-items-center">
 		   <div class="col collapseidhref"><a data-toggle="collapse" aria-expanded="false" aria-controls="collapseExample">Details</a></div>
 		    <div class="col"></div>
-		   <div class="col col-md-auto updatetime">Updated 3 mins ago</div>
+		   <div class="col col-md-auto updatetime"></div>
 		</div></small>
       </div>
      </div>
-  </div>
+   </div>
   </div>
   
   <div class="tab-pane" id="oloans" role="tabpanel">
   <div class="card">
 	<div class="card-header">Opened Loans</div>
 	<div class="card-block">
-	   <table class="table" style="margin-top:10px" width="100%" id="openloans">
+	   <table class="table margintop" width="100%" id="openloans">
 		  <thead><tr><th>Date</th><th>Coin</th><th>Amount</th><th>Duration</th><th>Interest</th></tr></thead>
 		  <tbody></tbody>
 	   </table>
@@ -242,14 +241,14 @@
   <div class="tab-pane" id="logtab" role="tabpanel">
      <div class="card">
 	    <div class="card-header">
-		<!-- https://codepen.io/SitePoint/pen/VKxbmj/ -->
-           <button class="btn btn-success" type="button">Success  <span class="badge" id="successnumber"></span></button>
-           <button class="btn btn-info"    type="button">Canceled <span class="badge" id="cancelednumber"></span></button>
-           <button class="btn btn-danger"  type="button">Error    <span class="badge" id="errornumber"></span></button>
-           <button class="btn infobutton"  type="button">Info     <span class="badge" id="infonumber"></span></button>
+           <button class="btn btn-success marginbottom"  type="button">Success  <span class="badge" id="successnumber"></span></button>
+		   <button class="btn btn-danger marginbottom"   type="button">Error    <span class="badge" id="errornumber"></span></button>	   
+           <button class="btn btn-info marginbottom"     type="button">Canceled <span class="badge" id="cancelednumber"></span></button>
+           <button class="btn infobutton marginbottom"   type="button">Info     <span class="badge" id="infonumber"></span></button>
+           
         </div>
 	    <div class="card-block">
-           <table class="table compact" width="100%" style="margin-top:10px" id="logtable"  cellspacing="0">
+           <table class="table compact margintop" width="100%" id="logtable" cellspacing="0">
 		     <thead><tr><th>Type</th><th>Date</th><th>Message</th></tr></thead>
              <tbody></tbody>
            </table>
@@ -269,33 +268,33 @@
 						
 						<div class="form-group">
                             <h5>Design</h5>
-                            <input checked class="switchradio" type="checkbox" data-on-text="Classic" data-off-text="Grid" onSwitchChange="function(event,state)">
+                            <input checked class="switchradio" type="checkbox" data-on-text="Classic" data-off-text="Grid" id="dashboardstyle">
                         </div>
 						
 						<div class="form-group">
                             <h5>Notification</h5>
 							
 							<label class="checkbox-inline">
-							<input checked class="switchradio" type="checkbox"  onSwitchChange="function(event,state)"> On Update
+							<input class="switchradio" type="checkbox"  id="notificationOnUpdate"> On Update
 							</label>
 							
 							<label class="checkbox-inline">
-							<input checked class="switchradio" type="checkbox"  onSwitchChange="function(event,state)"> On Error
+							<input class="switchradio" type="checkbox"  id="notificationOnError"> On Error
 							</label>
 							
 							<label class="checkbox-inline">
-                            <input checked class="switchradio" type="checkbox"  onSwitchChange="function(event,state)"> On Loan
+                            <input class="switchradio" type="checkbox"  id="notificationOnLoan"> On Loan
 							</label>
 							
                         </div>
 						<div class="form-group">
                             <h5>Notification Method</h5>
-							<input checked class="switchradio" type="checkbox" data-on-color="primary" data-off-color="primary" data-on-text="Push" data-off-text="Toastr" onSwitchChange="function(event,state)">
+							<input checked class="switchradio" type="checkbox" data-on-color="primary" data-off-color="primary" data-on-text="Push" data-off-text="Toastr" id="notification">
                         </div>
 						
 						<div class="form-group">
 						    <h5>Display Currency</h5>
-							<div class="dropdown show">
+							<div class="dropdown">
 							  <a class="btn btn-secondary dropdown-toggle" href="#" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></a>
 							  <div class="dropdown-menu" id="currencydropdown" aria-labelledby="dropdownMenuLink">
 							     <a class="dropdown-item" href="#" data-value="1">BTC</a>
@@ -306,45 +305,45 @@
                         <div class="form-group">
                             <h5>Date ranges to display earnings for</h5>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Hour" type="checkbox"> Hourly
+                                <input checked class="switchradio" data-timespan="Hour" type="checkbox"  id="rangeHourly"> Hourly
                             </label>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Day" type="checkbox"> Daily
+                                <input checked class="switchradio" data-timespan="Day" type="checkbox"  id="rangeDaily"> Daily
                             </label>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Week" type="checkbox"> Weekly
+                                <input checked class="switchradio" data-timespan="Week" type="checkbox"  id="rangeWeekly"> Weekly
                             </label>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Month" type="checkbox"> Monthly
+                                <input checked class="switchradio" data-timespan="Month" type="checkbox"  id="rangeMonthly"> Monthly
                             </label>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Year" type="checkbox"> Yearly
+                                <input checked class="switchradio" data-timespan="Year" type="checkbox"  id="rangeYearly"> Yearly
                             </label>
                         </div>
 
                         <div class="form-group">
                             <h5>Bitcoin Display Unit</h5>
                             <label class="radio-inline">
-                                <input checked class="switchradio" data-radio-all-off="true" value="BTC" type="radio" name="btcDisplayUnit"> BTC
+                                <input checked class="switchradio" data-radio-all-off="true" value="BTC" type="radio" name="btcDisplayUnit" id="DisplayUnitBTC"> BTC
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="mBTC" type="radio" name="btcDisplayUnit"> mBTC
+                                <input class="switchradio" data-radio-all-off="true" value="mBTC" type="radio" name="btcDisplayUnit" id="DisplayUnitmBTC"> mBTC
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="Bits" type="radio" name="btcDisplayUnit"> Bits
+                                <input class="switchradio" data-radio-all-off="true" value="Bits" type="radio" name="btcDisplayUnit" id="DisplayUnitBits"> Bits
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="Satoshi" type="radio" name="btcDisplayUnit"> Satoshi
+                                <input class="switchradio" data-radio-all-off="true" value="Satoshi" type="radio" name="btcDisplayUnit" id="DisplayUnitSatoshi"> Satoshi
                             </label>
                         </div>
 
                         <div class="form-group">
                             <h5>Which earnings are displayed in selected output currency</h5>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="all" type="radio" name="outputCurrencyDisplayMode"> All Coins
+                                <input class="switchradio" data-radio-all-off="true" value="all" type="radio" name="outputCurrencyDisplayMode"  id="allcoins"> All Coins
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="summary" type="radio" name="outputCurrencyDisplayMode"> Only Summary
+                                <input class="switchradio" data-radio-all-off="true" value="summary" type="radio" name="outputCurrencyDisplayMode"  id="summary"> Only Summary
                             </label>
                         </div>
 
@@ -352,10 +351,10 @@
                             <h5>Effective loan rates calculation</h5>
                             <p class="small">Effective rate can either take into consideration the actual amount actively lent OR consider only Poloniex 15% fee</p>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="lentperc" type="radio" name="effRateMode"> Fee and Effective Lent
+                                <input class="switchradio" data-radio-all-off="true" value="lentperc" type="radio" name="effRateMode" id="FeeLent"> Fee and Effective Lent
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="onlyfee" type="radio" name="effRateMode"> Fee Only
+                                <input class="switchradio" data-radio-all-off="true" value="onlyfee" type="radio" name="effRateMode" id="Fee"> Fee Only
                             </label>
                         </div>
                         
@@ -366,10 +365,8 @@
 						
 						<div class="form-group">
                             <h5>Relative Dates</h5>
-							<input checked class="switchradio" type="checkbox" data-on-text="On" data-off-text="Off" onSwitchChange="function(event,state)">
+							<input checked class="switchradio" type="checkbox" data-on-text="On" data-off-text="Off" id="relativedates">
                         </div>
-						
-                        <button type="button" class="btn btn-primary" onclick="doSave()">Save changes</button>
 						
                     </form>
                 </div>
@@ -379,7 +376,7 @@
 	<div class="card">
 	    <div class="card-header">Configuration</div>
 	    <div class="card-block">
-		<p class="card-text" style="margin-bottom:0"></p>
+		<p class="card-text marginzero"></p>
 		   sleeptimeactive
 		   sleeptimeinactive
 		   mindailyrate
