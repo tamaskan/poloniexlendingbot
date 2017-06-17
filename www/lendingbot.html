@@ -153,7 +153,7 @@
   <div class="tab-pane active" id="home" role="tabpanel">
   
 	<table class="table table-sm margintop" id="coinstatustable">
-		 <thead><th>Coin</th><th>Balance</th><th class="displayCurrency">Balance $</th><th>Interest</th><th>Interest %</th><th class="displayCurrency">Interest $</th></thead> <tbody>
+		 <thead><th>Coin</th><th>Balance</th><th class="displayCurrency">Balance $</th><th>Interest 24h</th><th>Interest Total</th><th class="displayCurrency">Interest $</th></thead> <tbody>
 		  </tbody>
 	</table>
 	
@@ -305,45 +305,45 @@
                         <div class="form-group">
                             <h5>Date ranges to display earnings for</h5>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Hour" type="checkbox"  id="rangeHourly"> Hourly
+                                <input checked class="switchradio" data-timespan="Hour" type="checkbox"> Hourly
                             </label>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Day" type="checkbox"  id="rangeDaily"> Daily
+                                <input checked class="switchradio" data-timespan="Day" type="checkbox"> Daily
                             </label>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Week" type="checkbox"  id="rangeWeekly"> Weekly
+                                <input checked class="switchradio" data-timespan="Week" type="checkbox"> Weekly
                             </label>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Month" type="checkbox"  id="rangeMonthly"> Monthly
+                                <input checked class="switchradio" data-timespan="Month" type="checkbox"> Monthly
                             </label>
                             <label class="checkbox-inline">
-                                <input checked class="switchradio" data-timespan="Year" type="checkbox"  id="rangeYearly"> Yearly
+                                <input checked class="switchradio" data-timespan="Year" type="checkbox"> Yearly
                             </label>
                         </div>
 
                         <div class="form-group">
                             <h5>Bitcoin Display Unit</h5>
                             <label class="radio-inline">
-                                <input checked class="switchradio" data-radio-all-off="true" value="BTC" type="radio" name="btcDisplayUnit" id="DisplayUnitBTC"> BTC
+                                <input checked class="switchradio" data-radio-all-off="true" value="BTC" type="radio" name="btcDisplayUnit"> BTC
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="mBTC" type="radio" name="btcDisplayUnit" id="DisplayUnitmBTC"> mBTC
+                                <input class="switchradio" data-radio-all-off="true" value="mBTC" type="radio" name="btcDisplayUnit"> mBTC
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="Bits" type="radio" name="btcDisplayUnit" id="DisplayUnitBits"> Bits
+                                <input class="switchradio" data-radio-all-off="true" value="Bits" type="radio" name="btcDisplayUnit"> Bits
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="Satoshi" type="radio" name="btcDisplayUnit" id="DisplayUnitSatoshi"> Satoshi
+                                <input class="switchradio" data-radio-all-off="true" value="Satoshi" type="radio" name="btcDisplayUnit"> Satoshi
                             </label>
                         </div>
 
                         <div class="form-group">
                             <h5>Which earnings are displayed in selected output currency</h5>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="all" type="radio" name="outputCurrencyDisplayMode"  id="allcoins"> All Coins
+                                <input class="switchradio" data-radio-all-off="true" value="all" type="radio" name="outputCurrencyDisplayMode"> All Coins
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="summary" type="radio" name="outputCurrencyDisplayMode"  id="summary"> Only Summary
+                                <input class="switchradio" data-radio-all-off="true" value="summary" type="radio" name="outputCurrencyDisplayMode"> Only Summary
                             </label>
                         </div>
 
@@ -351,10 +351,10 @@
                             <h5>Effective loan rates calculation</h5>
                             <p class="small">Effective rate can either take into consideration the actual amount actively lent OR consider only Poloniex 15% fee</p>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="lentperc" type="radio" name="effRateMode" id="FeeLent"> Fee and Effective Lent
+                                <input class="switchradio" data-radio-all-off="true" value="lentperc" type="radio" name="effRateMode"> Fee and Effective Lent
                             </label>
                             <label class="radio-inline">
-                                <input class="switchradio" data-radio-all-off="true" value="onlyfee" type="radio" name="effRateMode" id="Fee"> Fee Only
+                                <input class="switchradio" data-radio-all-off="true" value="onlyfee" type="radio" name="effRateMode"> Fee Only
                             </label>
                         </div>
                         
@@ -367,7 +367,7 @@
                             <h5>Relative Dates</h5>
 							<input checked class="switchradio" type="checkbox" data-on-text="On" data-off-text="Off" id="relativedates">
                         </div>
-						
+						<button type="button" class="btn btn-primary" onclick="doSave()">Save changes</button>
                     </form>
                 </div>
   </div></div>

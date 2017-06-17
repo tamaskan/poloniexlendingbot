@@ -157,10 +157,10 @@ function updateJson(data) {
 				  Jsondata[key]["highestBid"] = Jsondata[key]["highestBid"] || highbid || 1;
 				  Jsondata[key]["totalCoins"] = printFloat(value["totalCoins"] || value["maxToLend"],4);
 				  Jsondata[key]["balance"] = printFloat(localStorage.getItem('displayCurrencyRate') * (Jsondata[key]["totalCoins"] * value["highestBid"]),2);
-				  Jsondata[key]["interestcoin"] = "TBD";
-				  Jsondata[key]["interestpercent"] = "TBD";
-				  Jsondata[key]["interest"] = "TBD";
-				    //console.log(key,Jsondata[key]["lentSum"]);
+				  Jsondata[key]["interestcoin"] = Jsondata[key]["totalEarnings"] || 0;
+				  Jsondata[key]["interest24h"] = printFloat(Jsondata[key]["yesterdayEarnings"],6) || 0;
+				  Jsondata[key]["interestcurrency"] = printFloat(Jsondata[key]["totalEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
+
 				  if($('.cardclone').length == (Object.keys(Jsondata).length)){
 					   $('.clone'+key +' .cardcoinlent').html(Jsondata[key]["totalcoins"]);
 					   $('.clone'+key +' .cardcointotal').html(Jsondata[key]["balance"] + ' ' + localStorage.getItem('displayCurrency'));
@@ -193,7 +193,7 @@ function updateJson(data) {
 	 $('#coinstatustable tbody').empty();
 
 	 $.each(Jsondata,function(key,value){
-	  $('#coinstatustable').append('<tr><td>'+coinicon(key)+'</td><td>'+value["totalCoins"]+'</td><td>'+value["balance"]+'</td><td>'+value["interestcoin"] +'</td><td>'+value["interestpercent"]+'</td><td>'+value["interest"]+'</td></tr>');
+	  $('#coinstatustable').append('<tr><td>'+coinicon(key)+'</td><td>'+value["totalCoins"]+'</td><td>'+value["balance"]+'</td><td>'+value["interest24h"]+'</td><td>'+value["interestcoin"] +'</td><td>'+value["interestcurrency"]+'</td></tr>');
 	 });
 	 
 	 updatedonut();
@@ -226,7 +226,7 @@ function updateJson(data) {
 	   var coinobject = ((data.log[i]).match(/([A-Z]{0,5})'/))[1];
        var coinamountobject = ((data.log[i]).match(/\d{1,4}[\.]*\d*/))[1];
 	   if(mincoins[coinobject] != coinamountobject) {
-		   mincoins[coinobject] = value;
+		   mincoins[coinobject] = coinamountobject;
 		   localStorage.setItem("MinCoins",JSON.stringify(mincoins));
 		};
 	}	
@@ -661,16 +661,21 @@ function loadSettings() {
         $('input[data-timespan="' + t + '"]').prop('checked', true);
     });
 	
-	//Notification-Settings
+	
 
-/*
-	$('input.switchradio').each(function(key,value){
-		$("#"+this.id).bootstrapSwitch('state',localStorage.getItem(this.id);
-	})
+$('input.switchradio').each(function(key,value){
+	if(value.id){
+			console.log(value.id);
+			$("#"+value.id).bootstrapSwitch('state',localStorage.getItem(this.id) || false);
+	}	
+})
 	
 $('input.switchradio').on('switchChange.bootstrapSwitch', function (event, state) {
-	localStorage.setItem("#"+this.id,$("#"+this.id).bootstrapSwitch('state'));
-});*/
+	if(this.id){
+		console.log(this.id,state);
+		//localStorage.setItem("#"+this.id,$("#"+this.id).bootstrapSwitch('state'));
+	}
+});
 	
 }
 
@@ -715,12 +720,6 @@ function doSave() {
         effRateMode = localStorage.effRateMode;
     }
 
-	//Notification-Settings
-	localStorage.setItem('NotificationMethod',  $('#notification').val());
-	localStorage.setItem('NotificationOnUpdate',$('#notificationOnUpdate').val());
-	localStorage.setItem('NotificationOnError', $('#notificationOnError').val());
-	localStorage.setItem('NotificationOnLoan',  $('#notificationOnLoan').val());
-	
 	notification("Settings saved!","success");
 
     // Now we actually *use* these settings!
@@ -807,6 +806,9 @@ $(document).ready(function () {
 	  $('#currencydropdown').append('<a class="dropdown-item" href="#" data-name="'+v+'" data-value="'+m['last']+'">'+v+'</a>');
      });
     });
+	
+	localStorage.setItem("displayCurrency",localStorage.getItem("displayCurrency") || "BTC");
+	localStorage.setItem("displayCurrencyRate",localStorage.getItem("displayCurrencyRate") || 1);
 	
     $(document.body).on('click',".dropdown-item",function(){
 	   localStorage.setItem("displayCurrency",$(this).data("name"));
