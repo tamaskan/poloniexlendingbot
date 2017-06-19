@@ -1,0 +1,58 @@
+.coindetails {color:black !important;}
+	.card {margin-bottom:20px}
+        *,body {
+            font-family: 'Roboto Condensed', sans-serif;
+        }
+    
+        .fa-chevron-down,.fa-chevron-up {
+            float:right
+        }
+    
+        .brand-margin{
+            margin-top:4px;
+            margin-bottom:4px
+        }
+
+        .inlinediv {
+            display: inline-block;
+            padding-right: 5%;
+            vertical-align: top;
+        }
+        .plb-tooltip {
+            white-space: nowrap;
+            text-decoration: none;
+            border-bottom: 1px dotted;
+            color: black;
+        }
+        .plb-tooltip:hover {
+            text-decoration: none;
+        }
+
+        form h5 {
+            font-weight: 700;
+        }
+
+        form p,
+        form h5 {
+            margin-bottom: 5px;
+        }
+
+        .nav .fa {
+            color: black;
+        }
+
+        #file,
+        #input-file {
+            display: none;
+        }
+        
+        div.alert{
+          padding:0px;margin-bottom:0px
+        }
+		
+		.lendingimage { height:32px;width:32px;}
+		.margintop {margin-top:10px;}
+		.marginbottom {margin-bottom:10px;}
+		.marginzero {margin-bottom:0;}
+		.chartstyle {width:300px;height:400px;}
+		.cardicon {font-size:50px;text-align:center;padding-top:1.25rem;display:block}
