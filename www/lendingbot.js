@@ -216,7 +216,7 @@ tempdata = data;
     var dataSet = [];
     var logdataSet = [];
     
-    var regexarray = [/(\d{4}[.-]\d{2}[.-]\d{2}[ ]\d{2}[:]\d{2}[:]\d{2})/,/[ ]\d{0,20}[.]\d{0,20}[ ]([A-Z]{0,10})[ ]/,/[ ](\d{0,20}[.]\d{0,20})[ ]/,/\bfor?\b[ ](\d{0,3}[ ]\bdays?\b)/,/(\d{0,4}[.]\d{0,8}[%])/];
+    var regexarray = [/(\d{4}[.-]\d{2}[.-]\d{2}[ ]\d{2}[:]\d{2}[:]\d{2})/,/[ ]\d{0,20}[.]\d{0,20}[ ]([A-Z]{0,10})[ ]/,/[ ](\d{0,20}[.]\d{0,20})[ ]/,/\bfor?\b[ ](\d{0,3}[ ]\bdays?\b)/,/(\d{0,4}[.]\d{0,18}[%])/];
     for (var i = rowCount - 1; i >=0; i--) {
         
     if((data.log[i]).indexOf("min_loan_size") >= 0){
@@ -247,7 +247,7 @@ tempdata = data;
             
             var resultarray = [];
             $.each(regexarray,function(index,value){
-                resultarray.push(((data.log[i]).match(regexarray[index]))[1]);
+                resultarray.push(((data.log[i]).match(regexarray[index])[1]));
             });
             
             dataSet.push([shorttimestring(resultarray[0]),coinicon(resultarray[1]),resultarray[2],resultarray[3],resultarray[4]]);
