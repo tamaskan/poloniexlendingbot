@@ -132,12 +132,14 @@ function shorttimestring(timestring){
 }
  var totalamount = 0;
  var totalearnings = 0;
+ var total24hearnings = 0;
  var tempdata;
 function updateJson(data) {
 tempdata = data;
     Jsondata = data["raw_data"];
     totalamount = 0;
     totalearnings = 0;
+	total24hearnings = 0;
     $.get( "https://poloniex.com/public?command=returnTicker", function( data2 ) {
         data2["BTC_BTC"] = {};
      $.each(data2,function(k,v){
@@ -178,7 +180,7 @@ tempdata = data;
                   }
                   totalamount = +totalamount + +Jsondata[key]["balance"];
                   totalearnings = +totalearnings + +Jsondata[key]["interestcurrency"];
-                  
+                  total24hearnings = +total24hearnings + +printFloat(Jsondata[key]["yesterdayEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
               }
           })
       }
@@ -186,7 +188,7 @@ tempdata = data;
      });
 
      $('#totalcash').html(printFloat(totalamount,2) + ' ' + localStorage.getItem('displayCurrency'));
-     $('#totalinterest').html(printFloat(totalearnings,2) + ' ' + localStorage.getItem('displayCurrency'));
+     $('#totalinterest').html(printFloat(total24hearnings,2) + ' / ' + printFloat(totalearnings,2) + ' ' + localStorage.getItem('displayCurrency'));
      $('#coinstatustable tbody').empty();
 
      $.each(Jsondata,function(key,value){
