@@ -200,13 +200,17 @@ tempdata = data;
     $('.displayCurrency').each(function(){
         $(this).html(($(this).html().replace("$",localStorage.getItem("displayCurrency"))));
     })
-    
-    if((data.last_status).length > 0){
-        $('.updated').css("color","green").prop('title',moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
-        if(localStorage.getItem('notificationOnUpdate') == "true"){notification("Update successful","success");}
-    } else {
-        $('.updated').css("color","red").prop('title',data.last_status + ' ' + moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
+
+    if(Object.keys(data.raw_data).length < 1){
+		$('#home,#homegrid,#oloans,#logtab').contents(':not(.loader)').hide();
+		$('.loader').show();
+        $('.updated').css("color","red").prop('title',moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
         if(localStorage.getItem('notificationOnUpdate') == "true"){notification("Update failed","warning");}
+    } else {
+		$('.loader').hide();
+		$('.updated').css("color","green").prop('title',moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
+        if(localStorage.getItem('notificationOnUpdate') == "true"){notification("Update successful","success");}
+        
     }  
     
     var rowCount = data.log.length;
@@ -416,8 +420,6 @@ function updateRawValues(rawData){
             }
             
             if(printFloat(yearlyRateComp, 2) > 0){$('#cointable').append('<tr><td>'+coinicon(currency)+'</td><td>'+ printFloat(yearlyRateComp, 2) +'</td></tr>')};  
-            //placeholder for https://github.com/BitBotFactory/poloniexlendingbot/pull/349   
-            //<p style="text-align:center">Earned ' + [API-Response] +' <i class="cc ' + displayCurrency + '"></i></p>
             
             var lentStr = '<div class="progress" style="margin-bottom:20px"><div class="progress-bar bg-success" role="progressbar" aria-valuenow="'+printFloat(lentPerc, 2)+'" aria-valuemin="0" aria-valuemax="100" style="width:'+printFloat(lentPerc, 2)+'%">'+printFloat(lentPerc, 2)+'</div></div><p style="text-align:center">Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + mincoincheck(displayCurrency,printFloat(totalCoins * btcMultiplier, 4)) + ' (' + printFloat(lentPerc, 2) + '%)</p>';
                        
@@ -789,7 +791,11 @@ $(document).ready(function () {
     
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
      if($(e.target).attr("href") == "#logtab"){
-         $( document ).ready(function() {logtable.fnAdjustColumnSizing();});
+         $( document ).ready(function() {
+			    if($.fn.dataTable.isDataTable( '#logtable' )){
+				    logtable.fnAdjustColumnSizing();
+			    }	 
+			 });
      } 
     })
 
