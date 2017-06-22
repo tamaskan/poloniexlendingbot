@@ -117,7 +117,7 @@ function coinicon(string){
 }   
 
 function shorttimestring(timestring){
-    if(localStorage.getItem('relativedates') == (false || null)){return timestring;}
+    if(localStorage.getItem('relativedates') == ("false" || null)){return timestring;}
         var time = moment(timestring,'YYYY-MM-DD h:mm:ss').format(dateformat);
         var shorttime;
         
@@ -157,7 +157,7 @@ tempdata = data;
                   Jsondata[key]["interest24h"] = printFloat(Jsondata[key]["yesterdayEarnings"],8) || 0;
                   Jsondata[key]["interestcurrency"] = printFloat(Jsondata[key]["totalEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
 
-                  if($('.cardclone').length == (Object.keys(Jsondata).length)){
+                  if($('.cardclone').length >= (Object.keys(Jsondata).length)){
                        $('.clone'+key +' .cardcoinlent').html('<a data-toggle="tooltip"  class="plb-tooltip" title="Lent / Total">' + (Jsondata[key]["lentSum"] || 0) + ' / ' + Jsondata[key]["totalCoins"]  + ' ' + coin + '</a>');
                        $('.clone'+key +' .cardcointotal').html(Jsondata[key]["balance"] + ' ' + localStorage.getItem('displayCurrency'));
                        $('.clone'+key +' .cardearned').html('<a data-toggle="tooltip"  class="plb-tooltip" title="Yesterday / Total">' + Jsondata[key]["interest24h"] +' / '+Jsondata[key]["interestcoin"] + '</a>');
@@ -289,7 +289,6 @@ tempdata = data;
     else {
        mydatatable = $('#openloans').dataTable({responsive: true,createdRow: function( row, data, dataIndex ) {
           $( row ).find('tr').addClass($( row ).find('td:eq(2) span').attr('data-type'));
-          //success danger warning info active
         }});
     }
 
