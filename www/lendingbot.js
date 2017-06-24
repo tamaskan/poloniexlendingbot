@@ -151,11 +151,11 @@ tempdata = data;
               if (key == coin) {
                   
                   Jsondata[key]["highestBid"] = Jsondata[key]["highestBid"] || highbid || 1;
-                  Jsondata[key]["totalCoins"] = printFloat(value["totalCoins"] || value["maxToLend"],4);
-                  Jsondata[key]["balance"] = printFloat(localStorage.getItem('displayCurrencyRate') * (Jsondata[key]["totalCoins"] * value["highestBid"]),2);
+                  Jsondata[key]["totalCoins"] = prettyFloat(+value["totalCoins"] || +value["maxToLend"],4);
+                  Jsondata[key]["balance"] = prettyFloat(localStorage.getItem('displayCurrencyRate') * (Jsondata[key]["totalCoins"] * value["highestBid"]),2);
                   Jsondata[key]["interestcoin"] = Jsondata[key]["totalEarnings"] || 0;
-                  Jsondata[key]["interest24h"] = printFloat(Jsondata[key]["yesterdayEarnings"],8) || 0;
-                  Jsondata[key]["interestcurrency"] = printFloat(Jsondata[key]["totalEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
+                  Jsondata[key]["interest24h"] = prettyFloat(+Jsondata[key]["yesterdayEarnings"],8) || 0;
+                  Jsondata[key]["interestcurrency"] = prettyFloat(Jsondata[key]["totalEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
 
                   if($('.cardclone').length >= (Object.keys(Jsondata).length)){
                        $('.clone'+key +' .cardcoinlent').html('<a data-toggle="tooltip"  class="plb-tooltip" title="Lent / Total">' + (Jsondata[key]["lentSum"] || 0) + ' / ' + Jsondata[key]["totalCoins"]  + ' ' + coin + '</a>');
@@ -180,15 +180,15 @@ tempdata = data;
                   }
                   totalamount = +totalamount + +Jsondata[key]["balance"];
                   totalearnings = +totalearnings + +Jsondata[key]["interestcurrency"];
-                  total24hearnings = +total24hearnings + +printFloat(Jsondata[key]["yesterdayEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
+                  total24hearnings = +total24hearnings + +prettyFloat(Jsondata[key]["yesterdayEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
               }
           })
       }
     
      });
 
-     $('#totalcash').html(printFloat(totalamount,2) + ' ' + localStorage.getItem('displayCurrency'));
-     $('#totalinterest').html(printFloat(total24hearnings,2) + ' / ' + printFloat(totalearnings,2) + ' ' + localStorage.getItem('displayCurrency'));
+     $('#totalcash').html(prettyFloat(totalamount,2) + ' ' + localStorage.getItem('displayCurrency'));
+     $('#totalinterest').html(prettyFloat(total24hearnings,2) + ' / ' + prettyFloat(totalearnings,2) + ' ' + localStorage.getItem('displayCurrency'));
      $('#coinstatustable tbody').empty();
 
      $.each(Jsondata,function(key,value){
@@ -222,7 +222,7 @@ tempdata = data;
     var dataSet = [];
     var logdataSet = [];
     
-    var regexarray = [/(\d{4}[.-]\d{2}[.-]\d{2}[ ]\d{2}[:]\d{2}[:]\d{2})/,/[ ]\d{0,20}[.]\d{0,20}[ ]([A-Z]{0,10})[ ]/,/[ ](\d{0,20}[.]\d{0,20})[ ]/,/\bfor?\b[ ](\d{0,3}[ ]\bdays?\b)/,/(\d{0,4}[.]\d{0,18}[%])/];
+    var regexarray = [/(\d{4}[.-]\d{2}[.-]\d{2}[ ]\d{2}[:]\d{2}[:]\d{2})/,/[ ]\d{0,20}[.]\d{0,20}[ ]([A-Z]{0,10})[ ]/,/[ ](\d{0,20}[.]\d{0,20})[ ]/,/\bfor?\b[ ](\d{0,3}[ ]\bdays?\b)/,/(\d{0,4}[.]\d{0,18})[%]/];
     for (var i = rowCount - 1; i >=0; i--) {
         
     if((data.log[i]).indexOf("min_loan_size") >= 0){
@@ -256,7 +256,7 @@ tempdata = data;
                 resultarray.push(((data.log[i]).match(regexarray[index])[1]));
             });
             
-            dataSet.push([shorttimestring(resultarray[0]),coinicon(resultarray[1]),resultarray[2],resultarray[3],resultarray[4]]);
+            dataSet.push([shorttimestring(resultarray[0]),coinicon(resultarray[1]),prettyFloat(+resultarray[2],4),resultarray[3],prettyFloat(+resultarray[4],4) + ' %']);
             
             if($('.btn-success').hasClass('disabled')) {} else {logdataSet.push(["Success",timestring,message]);}
             
@@ -420,7 +420,7 @@ function updateRawValues(rawData){
                 yearlyRateComp = localStorage.getItem('yearlyrate'+currency);
             }
             
-            if(printFloat(yearlyRateComp, 2) > 0){$('#cointable').append('<tr><td>'+coinicon(currency)+'</td><td>'+ printFloat(yearlyRateComp, 2) +'</td></tr>')};  
+            if(printFloat(yearlyRateComp, 2) > 0){$('#cointable').append('<tr><td>'+coinicon(currency)+'</td><td>'+ prettyFloat(yearlyRateComp, 2) +'</td></tr>')};  
             
             var lentStr = '<div class="progress" style="margin-bottom:20px"><div class="progress-bar bg-success" role="progressbar" aria-valuenow="'+printFloat(lentPerc, 2)+'" aria-valuemin="0" aria-valuemax="100" style="width:'+printFloat(lentPerc, 2)+'%">'+printFloat(lentPerc, 2)+'</div></div><p style="text-align:center">Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + mincoincheck(displayCurrency,printFloat(totalCoins * btcMultiplier, 4)) + ' (' + printFloat(lentPerc, 2) + '%)</p>';
                        
