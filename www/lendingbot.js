@@ -293,7 +293,7 @@ tempdata = data;
     }
 
     mydatatable.fnClearTable();
-    mydatatable.fnAddData(dataSet);
+    if(dataSet.length > 0){mydatatable.fnAddData(dataSet);}
     
     if ( $.fn.dataTable.isDataTable( '#logtable' ) ) {
        logtable = $('#logtable').dataTable();
@@ -306,7 +306,7 @@ tempdata = data;
     }
 
     logtable.fnClearTable();
-    logtable.fnAddData(logdataSet);
+    if(logdataSet.length > 0){logtable.fnAddData(logdataSet);}
     logtable.fnAdjustColumnSizing();
 }
 
