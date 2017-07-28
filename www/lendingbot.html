@@ -92,7 +92,7 @@
 
 <!-- Tab panes -->
 <div class="tab-content">
-  <div class="tab-pane active" id="home" role="tabpanel">
+  <div class="tab-pane active" id="home" role="tabpanel"> 
   <div class="loader" style="display:none"></div>
     <table class="table table-sm margintop" id="coinstatustable">
          <thead><th>Coin</th><th>Balance</th><th class="displayCurrency">Balance $</th><th>Interest 24h</th><th>Interest Total</th><th class="displayCurrency">Interest $</th></thead> <tbody>
@@ -127,6 +127,25 @@
   </div>
   <div class="tab-pane" id="homegrid" role="tabpanel">
   <div class="loader" style="display:none"></div>
+  <!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Forecast</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div style=""><canvas id="myChart"></canvas></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onClick="chart.destroy()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
     <div class="card-deck">
      
      <div class="card text-center">
@@ -307,71 +326,6 @@
                     </form>
                 </div>
   </div></div>
-  <div class="tab-pane" id="configuration" role="tabpanel">
-    <!-- http://poloniexlendingbot.readthedocs.io/en/latest/configuration.html -->
-    <div class="card">
-        <div class="card-header">Configuration</div>
-        <div class="card-block">
-        <p class="card-text marginzero"></p>
-           sleeptimeactive
-           sleeptimeinactive
-           mindailyrate
-           maxdailyrate
-           spreadlend
-           gapbottom
-           gaptop
-           xdaythreshold
-           xdays
-           transferableCurrencies
-           minloansize
-           KeepStuckOrders
-           hideCoins
-           endDate
-           
-           maxtolend
-           maxpercenttolend
-           maxtolendrate
-           analyseCurrencies
-           analyseMaxAge
-           analyseUpdateInterval
-           lendingStyle
-           coincfg
-           
-           jsonfile
-           jsonlogsize
-           startWebServer
-           customWebServerAddress
-           outputCurrency
-           plugins
-           
-           notify_new_loans
-           notify_tx_coins
-           notify_xday_threshold
-           notify_summary_minutes
-           notify_caught_exception
-           
-           email = True
-email_login_address = me@gmail.com
-email_login_password = secretPassword
-email_smtp_server = smtp.gmail.com
-email_smtp_port = 465
-email_smtp_starttls = False
-email_to_addresses = me@gmail.com,you@gmail.com
-
-slack = True
-slack_token = xoxp-46351793751-46348393136-47931965411-a8757952e4
-slack_channels = #cryptocurrency,@someUser
-
-telegram = True
-telegram_bot_id = 281421543:AGGB1TqP7XqhxhT7VOty0Aml8DV_R6kimHw
-telegram_chat_ids = 123456789,@cryptocurrency
-
-pushbullet = True
-pushbullet_token = l.2mDDvy4RRdzcQN9LEWSy22amS7u3LJZ1
-pushbullet_deviceid = ujpah72o0sjAoRtnM0jb
-        </div>
-    </div>
-  </div>
 </div>
     
     <!-- jQuery Version 3.2.1 -->
@@ -401,6 +355,7 @@ pushbullet_deviceid = ujpah72o0sjAoRtnM0jb
     <script src="js/bootstrap-switch.min.js"></script>
     
     <script src="lendingbot.js?version=2" ></script>
+    
 </body>
 
 </html>

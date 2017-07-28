@@ -139,7 +139,7 @@ tempdata = data;
     Jsondata = data["raw_data"];
     totalamount = 0;
     totalearnings = 0;
-	total24hearnings = 0;
+    total24hearnings = 0;
     $.get( "https://poloniex.com/public?command=returnTicker", function( data2 ) {
         data2["BTC_BTC"] = {};
      $.each(data2,function(k,v){
@@ -158,11 +158,15 @@ tempdata = data;
                   Jsondata[key]["interestcurrency"] = prettyFloat(Jsondata[key]["totalEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
 
                   if($('.cardclone').length >= (Object.keys(Jsondata).length)){
+                     
                        $('.clone'+key +' .cardcoinlent').html('<a data-toggle="tooltip"  class="plb-tooltip" title="Lent / Total">' + (Jsondata[key]["lentSum"] || 0) + ' / ' + Jsondata[key]["totalCoins"]  + ' ' + coin + '</a>');
                        $('.clone'+key +' .cardcointotal').html(Jsondata[key]["balance"] + ' ' + localStorage.getItem('displayCurrency'));
                        $('.clone'+key +' .cardearned').html('<a data-toggle="tooltip"  class="plb-tooltip" title="Yesterday / Total">' + Jsondata[key]["interest24h"] +' / '+Jsondata[key]["interestcoin"] + '</a>');
                        $('.clone'+key +' .coingriddetails').html($('.coindetails.'+key+' td:eq(1)').html());
-                       if(+value["lentSum"] > 0){$('.clone'+key +' .collapseidhref').show();} else {$('.clone'+key +' .collapseidhref').hide();}
+                       if(+value["lentSum"] > 0){
+                           $('.clone'+key +' .cardearned').html('<a style="color:#5b75dd" data-toggle="tooltip"  class="plb-tooltip" title="Yesterday / Total" onClick="coindata(\''+key+'\','+Jsondata[key]["totalCoins"]+')">' + Jsondata[key]["interest24h"] +' / '+Jsondata[key]["interestcoin"] + '</a>');
+                           $('.clone'+key +' .collapseidhref').show();} else {$('.clone'+key +' .collapseidhref').hide();
+                           }
                        $('.updatetime').html(shorttimestring(data.last_update));
                   }
                   else {
@@ -174,7 +178,10 @@ tempdata = data;
                   $('.cc',template).addClass(key);
                   $('.collapseidhref a',template).attr('href', '#'+key+'collapse');
                   $('.collapseid',template).attr('id', key+'collapse'); 
-                  if(+value["lentSum"] > 0){$('.collapseidhref',template).show();$('.coingriddetails',template).html($('.coindetails.'+key+' td:eq(1)').html());} else {$('.collapseidhref',template).hide();}
+                  if(+value["lentSum"] > 0){
+                      $('.cardearned',template).html('<a style="color:#5b75dd" data-toggle="tooltip"  class="plb-tooltip" title="Yesterday / Total" onClick="coindata(\''+key+'\','+Jsondata[key]["totalCoins"]+')">' + Jsondata[key]["interest24h"] +' / '+Jsondata[key]["interestcoin"] + '</a>');
+                      $('.collapseidhref',template).show();$('.coingriddetails',template).html($('.coindetails.'+key+' td:eq(1)').html());} else {$('.collapseidhref',template).hide();
+                      }
                      $('.cardoverview').append(template);    
                      $('.updatetime').html(shorttimestring(data.last_update));
                   }
@@ -204,13 +211,13 @@ tempdata = data;
     })
 
     if(Object.keys(data.raw_data).length < 1){
-		$('#home,#homegrid,#oloans,#logtab').contents(':not(.loader)').hide();
-		$('.loader').show();
+        $('#home,#homegrid,#oloans,#logtab').contents(':not(.loader)').hide();
+        $('.loader').show();
         $('.updated').css("color","red").prop('title',moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
         if(localStorage.getItem('notificationOnUpdate') == "true"){notification("Update failed","warning");}
     } else {
-		$('.loader').hide();
-		$('.updated').css("color","green").prop('title',moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
+        $('.loader').hide();
+        $('.updated').css("color","green").prop('title',moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
         if(localStorage.getItem('notificationOnUpdate') == "true"){notification("Update successful","success");}
         
     }  
@@ -750,6 +757,69 @@ function coindetails(param,coin,status) {
         $(param).siblings('.fa').toggle();
       }
 
+var ctx = $("#myChart");
+var chart = "";
+
+function coindata(coinname,amount){ 
+
+var coin = "BTC";
+var rate = 0;
+$("#cointable tr").each(function() {
+  $this = $(this);
+   if (($this.find("td").text()).indexOf(coin) >= 0) {
+    rate = ($this.find("td").text()).replace(coin,"");
+   }
+  
+});
+
+var coind = [];
+var year = moment().year();
+var yeararray = [];
+for (var n = 0; n < 5; ++ n) {
+   coind[n] = parseFloat(amount + (amount * (rate / 100)));
+   amount = coind[n];
+   year = year + 1;
+   yeararray.push(year);
+} 
+
+            var $inspector = $("<i class='cc'>").css('display', 'none').addClass(coinname);
+            $("body").append($inspector); 
+            try {
+                coincolor = $inspector.css('color');
+            } finally {
+                $inspector.remove(); 
+            }
+            
+data = { labels: yeararray,datasets: [{
+                    label: coinname,
+                    backgroundColor: coincolor,
+                    borderColor: coincolor,
+                    data: coind,
+                    fill: false,
+                }] };
+                
+
+
+chart = new Chart(ctx, {
+    type: 'line',
+    data: data,
+    options: {
+        scales: {
+            xAxes: [{
+                time: {
+                    unit: 'month'
+                },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Date'
+                        }
+            }]
+        }
+    }
+})
+$('#myModal').modal('toggle');
+}     
+      
 $(document).ready(function () {
     toastr.options = {
         "positionClass": "toast-top-center"
@@ -793,10 +863,10 @@ $(document).ready(function () {
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
      if($(e.target).attr("href") == "#logtab"){
          $( document ).ready(function() {
-			    if($.fn.dataTable.isDataTable( '#logtable' )){
-				    logtable.fnAdjustColumnSizing();
-			    }	 
-			 });
+                if($.fn.dataTable.isDataTable( '#logtable' )){
+                    logtable.fnAdjustColumnSizing();
+                }    
+             });
      } 
     })
 
@@ -822,6 +892,9 @@ $(document).ready(function () {
        window.location.reload(true);
     });
     
+    
+
+
 });
 
 
