@@ -31,9 +31,9 @@ var accounttotal;
 var mincoins = JSON.parse(localStorage.getItem('MinCoins')) || {'BTC':0.01,'BTS':10,'CLAM':10,'DASH':0.01,'DOGE':100,'ETH':0.01,'FCT':100,'LTC':0.01,'MAID':10,'STR':100,'XMR':0.01,'XRP':100};
 
 function mincoincheck(exchange,coin,value){
-	if(exchange == "BITFINEX"){
-		//BITFINEX -> 50$
-	}
+    if(exchange == "BITFINEX"){
+        //BITFINEX -> 50$
+    }
     var response;
           if (mincoins[coin] && value >= mincoins[coin]) {response = value;}
           else if(mincoins[coin]) {response = '<a data-toggle="tooltip" style="color:red" class="plb-tooltip" title=" Minimum ' + mincoins[coin] + ' Coins ">' + value + '</a>';}
@@ -101,29 +101,29 @@ function timeleft(timestring){
  var coindataSet;
  
 function updateJson(data) {
-	
-	coindataSet = [];
+    
+    coindataSet = [];
     Jsondata = data["raw_data"];
-	$('.exchangefilter').empty();
-	$('.exchangefilter').append("<option value=''>All</option>");
-	 
-	$.each(Jsondata,function(key,value){
-		$('.exchangefilter').append("<option value=\""+key+"\">"+key+"</option>");
-		
-		switch(key){
-		
-		case "POLONIEX":
-		  poloapi(value);
-		  break;
-		
-		case "BITFINEX":
-		  bitfinexapi(value);
-		  break;
-		}
-	})
-	
-	function poloapi(data){
-		$.get( "https://poloniex.com/public?command=returnTicker", function( poloniexdata ) {
+    $('.exchangefilter').empty();
+    $('.exchangefilter').append("<option value=''>All</option>");
+     
+    $.each(Jsondata,function(key,value){
+        $('.exchangefilter').append("<option value=\""+key+"\">"+key+"</option>");
+        
+        switch(key){
+        
+        case "POLONIEX":
+          poloapi(value);
+          break;
+        
+        case "BITFINEX":
+          bitfinexapi(value);
+          break;
+        }
+    })
+    
+    function poloapi(data){
+        $.get( "https://poloniex.com/public?command=returnTicker", function( poloniexdata ) {
         poloniexdata["BTC_BTC"] = {};
      $.each(poloniexdata,function(k,v){
       if (k.indexOf('BTC_') >=0) {
@@ -139,80 +139,80 @@ function updateJson(data) {
                   Jsondata["POLONIEX"][key]["interestcoin"] = Jsondata["POLONIEX"][key]["totalEarnings"] || 0;
                   Jsondata["POLONIEX"][key]["interest24h"] = prettyFloat(+Jsondata["POLONIEX"][key]["yesterdayEarnings"],8) || 0;
                   Jsondata["POLONIEX"][key]["interestcurrency"] = prettyFloat(Jsondata["POLONIEX"][key]["totalEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
-			  
-				  coindataSet.push([exchangeicon("POLONIEX",false), prettyFloat(Math.pow((+value["averageLendingRate"] * 0.85 / 100) + 1, 365) - 1,2) * 100 + " %",coinicon(key),value["totalCoins"],value["balance"],value["interest24h"],value["interestcoin"],value["interestcurrency"]]);
-				  
+              
+                  coindataSet.push([exchangeicon("POLONIEX",false), prettyFloat(Math.pow((+value["averageLendingRate"] * 0.85 / 100) + 1, 365) - 1,2) * 100 + " %",coinicon(key),value["totalCoins"],value["balance"],value["interest24h"],value["interestcoin"],value["interestcurrency"]]);
+                  
               }
-			  
+              
           })
-		  
+          
       }
     
      }); 
-	 rendertable();
+     rendertable();
     });
-	}
-	
-	function bitfinexapi(data){
-		var ticker = [];
-		
-		$.each(data,function(key,value){
-			ticker.push("t" + key.toUpperCase()+"BTC");
-		})
+    }
+    
+    function bitfinexapi(data){
+        var ticker = [];
+        
+        $.each(data,function(key,value){
+            ticker.push("t" + key.toUpperCase()+"BTC");
+        })
 
-		   $.get( "https://api.bitfinex.com/v2/tickers?symbols="+ticker.toString() , function( data ) {
-			$.each(data,function(key,value){
-				var coin = value[0].substring(1,value[0].length-3);
-				
-				Jsondata["BITFINEX"][coin]["highestBid"] = Jsondata["BITFINEX"][coin]["highestBid"] || value[7] || 1;
+           $.get( "https://api.bitfinex.com/v2/tickers?symbols="+ticker.toString() , function( data ) {
+            $.each(data,function(key,value){
+                var coin = value[0].substring(1,value[0].length-3);
+                
+                Jsondata["BITFINEX"][coin]["highestBid"] = Jsondata["BITFINEX"][coin]["highestBid"] || value[7] || 1;
                 Jsondata["BITFINEX"][coin]["totalCoins"] = prettyFloat(+Jsondata["BITFINEX"][coin]["totalCoins"] || +Jsondata["BITFINEX"][coin]["maxToLend"],4);
                 Jsondata["BITFINEX"][coin]["balance"] = prettyFloat(localStorage.getItem('displayCurrencyRate') * (Jsondata["BITFINEX"][coin]["totalCoins"] * Jsondata["BITFINEX"][coin]["highestBid"]),2);
                 Jsondata["BITFINEX"][coin]["interestcoin"] = Jsondata["BITFINEX"][coin]["totalEarnings"] || 0;
                 Jsondata["BITFINEX"][coin]["interest24h"] = prettyFloat(+Jsondata["BITFINEX"][coin]["yesterdayEarnings"],8) || 0;
                 Jsondata["BITFINEX"][coin]["interestcurrency"] = prettyFloat(Jsondata["BITFINEX"][coin]["totalEarnings"] * Jsondata["BITFINEX"][coin]["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
-				
-				coindataSet.push([exchangeicon("BITFINEX",false), "<span class='coinforecast'>"+prettyFloat(Math.pow((+Jsondata["BITFINEX"][coin]["averageLendingRate"] * 0.85 / 100) + 1, 365) - 1,4) * 100 + " %</span>",coinicon(coin),Jsondata["BITFINEX"][coin]["totalCoins"],Jsondata["BITFINEX"][coin]["balance"],Jsondata["BITFINEX"][coin]["interest24h"],Jsondata["BITFINEX"][coin]["interestcoin"],Jsondata["BITFINEX"][coin]["interestcurrency"]]);
-			})
-			rendertable();
-		   })
-		
-	}
-	var rendered = 0;
-	function rendertable(){
+                
+                coindataSet.push([exchangeicon("BITFINEX",false), "<span class='coinforecast'>"+prettyFloat(Math.pow((+Jsondata["BITFINEX"][coin]["averageLendingRate"] * 0.85 / 100) + 1, 365) - 1,4) * 100 + " %</span>",coinicon(coin),Jsondata["BITFINEX"][coin]["totalCoins"],Jsondata["BITFINEX"][coin]["balance"],Jsondata["BITFINEX"][coin]["interest24h"],Jsondata["BITFINEX"][coin]["interestcoin"],Jsondata["BITFINEX"][coin]["interestcurrency"]]);
+            })
+            rendertable();
+           })
+        
+    }
+    var rendered = 0;
+    function rendertable(){
        rendered++;
-	   if((rendered % 2) != 0){return false;}
-	   if ( $.fn.dataTable.isDataTable( '#coinstatustable' ) ) {
+       if((rendered % 2) != 0){return false;}
+       if ( $.fn.dataTable.isDataTable( '#coinstatustable' ) ) {
          cointable = $('#coinstatustable').DataTable().columns.adjust().draw( false );
        }
        else {
          cointable = $('#coinstatustable').DataTable({data: coindataSet,"bPaginate": false,"bInfo" : false,responsive: true} );
-	   }
-	}
+       }
+    }
     
     $('.displayCurrency').each(function(){
         $(this).html(($(this).html().replace("$",localStorage.getItem("displayCurrency"))));
     })
     
-	var successnumber = 0;
+    var successnumber = 0;
     var cancelednumber = 0;
     var errornumber = 0;
-	var infonumber = 0;
+    var infonumber = 0;
 
     var logdataSet = [];
     
     var regexarray = [/(\d{4}[.-]\d{2}[.-]\d{2}[ ]\d{2}[:]\d{2}[:]\d{2})/,/[ ]\d{0,20}[.]\d{0,20}[ ]([A-Z]{0,10})[ ]/,/[ ](\d{0,20}[.]\d{0,20})[ ]/,/\bfor?\b[ ](\d{0,3}[ ]\bdays?\b)/,/(\d{0,4}[.]\d{0,18})[%]/];
-	
+    
 for(exchange in data.log){
-		
+        
     var rowCount = data.log[exchange].length;
     localStorage.setItem('last_updated',data["last_update"]);
-	
+    
     for (var i = rowCount - 1; i >=0; i--) {
     
     var logstring = ((data.log[exchange][i]).match(regexarray[0]))[1];    
-	var logdate = shorttimestring(logstring);
+    var logdate = shorttimestring(logstring);
     var logmessage = data.log[exchange][i].replace(logstring,"");
-	
+    
     if((logmessage).indexOf("min_loan_size") >= 0){
        var coinobject = ((logmessage).match(/([A-Z]{0,5})'/))[1];
        var coinamountobject = ((logmessage).match(/: (\d{1,4}[\.]*\d*)/))[1];
@@ -236,28 +236,28 @@ for(exchange in data.log){
         }
         else if (logmessage.indexOf("Canceling") >= 0) {
             logmessage = '<span data-type="table-info">' + logmessage + '</span>';
-			logdataSet.push([exchangeicon(exchange,false),"Canceled",logdate,logmessage]);
+            logdataSet.push([exchangeicon(exchange,false),"Canceled",logdate,logmessage]);
             cancelednumber++;
             
         }
         else {
             logmessage = '<span data-type="table-custom">' +  coinicon(logmessage) + '</span>';
-			logdataSet.push([exchangeicon(exchange,false),"Info",logdate,logmessage]);
-			infonumber++;
+            logdataSet.push([exchangeicon(exchange,false),"Info",logdate,logmessage]);
+            infonumber++;
         }      
         
     } 
     
-	}
+    }
 
-	updateOutputCurrency(data.outputCurrency);
+    updateOutputCurrency(data.outputCurrency);
     updateRawValues(data.raw_data);
-	
+    
     $('#successnumber').bootstrapSwitch('onText', successnumber);
-	$('#cancelednumber').bootstrapSwitch('onText', cancelednumber);
-	$('#errornumber').bootstrapSwitch('onText', errornumber);
-	$('#infonumber').bootstrapSwitch('onText', infonumber);	
-	
+    $('#cancelednumber').bootstrapSwitch('onText', cancelednumber);
+    $('#errornumber').bootstrapSwitch('onText', errornumber);
+    $('#infonumber').bootstrapSwitch('onText', infonumber); 
+    
     if ( $.fn.dataTable.isDataTable( '#logtable' ) ) {
        logtable = $('#logtable').DataTable().columns.adjust().draw( false );
     }
@@ -271,10 +271,10 @@ for(exchange in data.log){
 }
 
 function exchangeicon(exchange,icononly){
-	if (exchange == "POLONIEX" && icononly == false){return '<img src="images/POLONIEX.ico" style="width:18px;height:18px;margin-right:5px;line-height:18px">' + exchange}
-	if (exchange == "BITFINEX" && icononly == false){return '<img src="images/BITFINEX.ico" style="width:18px;height:18px;margin-right:5px;line-height:18px">' + exchange}
-	if (exchange == "POLONIEX" && icononly == true){return '<img src="images/POLONIEX.ico" style="width:18px;height:18px;margin-right:5px;line-height:18px">'}
-	if (exchange == "BITFINEX" && icononly == true){return '<img src="images/BITFINEX.ico" style="width:18px;height:18px;margin-right:5px;line-height:18px">'}
+    if (exchange == "POLONIEX" && icononly == false){return '<img src="images/POLONIEX.ico" style="width:18px;height:18px;margin-right:5px;line-height:18px">' + exchange}
+    if (exchange == "BITFINEX" && icononly == false){return '<img src="images/BITFINEX.ico" style="width:18px;height:18px;margin-right:5px;line-height:18px">' + exchange}
+    if (exchange == "POLONIEX" && icononly == true){return '<img src="images/POLONIEX.ico" style="width:18px;height:18px;margin-right:5px;line-height:18px">'}
+    if (exchange == "BITFINEX" && icononly == true){return '<img src="images/BITFINEX.ico" style="width:18px;height:18px;margin-right:5px;line-height:18px">'}
 }
 
 function updateOutputCurrency(outputCurrency){
@@ -312,7 +312,7 @@ function updateRawValues(rawData){
     table.innerHTML = "";
     var currencies = Object.keys(rawData);
     var totalBTCEarnings = {};
-	
+    
 var dataSet = [];
 var coinlist = "";
 $('.loanfilter').empty();
@@ -321,7 +321,7 @@ var loanarray = {};
 
 for (exchange in rawData) {
  var currencies = Object.keys(rawData[exchange]);
-	
+    
     for (var keyIndex = 0; keyIndex < currencies.length; ++keyIndex)
     {
         var currency = currencies[keyIndex];
@@ -332,15 +332,15 @@ for (exchange in rawData) {
         var maxToLend = parseFloat(rawData[exchange][currency]['maxToLend']);
         var highestBidBTC = parseFloat(rawData[exchange][currency]['highestBid']);
 
-		// https://github.com/emilam/poloniexlendingbot/commit/8ac76573651855b43ab193dcf46e1e16144ac704
-		if(rawData[exchange][currency]["allLoans"] && rawData[exchange][currency]["allLoans"].length > 0){
-			loanarray[currency] = "";
-			for (var i = 0; i < rawData[exchange][currency]["allLoans"].length; ++i) {
-			   var loan = rawData[exchange][currency]["allLoans"][i];
-			   dataSet.push([exchangeicon(exchange,false),coinicon(currency),loan["duration"]+" days",timeleft(moment(loan["date"]).add(loan["duration"],'days')),loan["amount"],prettyFloat(parseFloat(loan["rate"]) * 100, 3) +" %",loan["amount"]*loan["rate"] + " " +currency]);
-			   
-		}}
-		
+        // https://github.com/emilam/poloniexlendingbot/commit/8ac76573651855b43ab193dcf46e1e16144ac704
+        if(rawData[exchange][currency]["allLoans"] && rawData[exchange][currency]["allLoans"].length > 0){
+            loanarray[currency] = "";
+            for (var i = 0; i < rawData[exchange][currency]["allLoans"].length; ++i) {
+               var loan = rawData[exchange][currency]["allLoans"][i];
+               dataSet.push([exchangeicon(exchange,false),coinicon(currency),loan["duration"]+" days",timeleft(moment(loan["date"]).add(loan["duration"],'days')),loan["amount"],prettyFloat(parseFloat(loan["rate"]) * 100, 3) +" %",loan["amount"]*loan["rate"] + " " +currency]);
+               
+        }}
+        
         if (currency == 'BTC') {
             // no bids for BTC provided by poloniex
             // this is added so BTC can be handled like other coins for conversions
@@ -408,42 +408,42 @@ for (exchange in rawData) {
                var detaildown = (localStorage.getItem(displayCurrency) == "true") ? 'none' : '';
                var detailup = (localStorage.getItem(displayCurrency) == "true") ? '' : 'none';
             } else {
-				var detaildown = "none";
-				var detailup = ";color:transparent;";  
+                var detaildown = "none";
+                var detailup = ";color:transparent;";  
             }
           
-			var earnings = '<div class="col-4">' + earnings + '</div>';
-			var earningsSummaryCoin = '<div class="col-4">' + earningsSummaryCoin + '</div>';
-			var calculation = "<div class='col-4'>" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '</br>'
+            var earnings = '<div class="col-4">' + earnings + '</div>';
+            var earningsSummaryCoin = '<div class="col-4">' + earningsSummaryCoin + '</div>';
+            var calculation = "<div class='col-4'>" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '</br>'
                    +  printFloat(effectiveRate, 5) + '% Day' + effRateText + '</br>'
                    +  printFloat(yearlyRate, 2) + '% Year' + '</br>'
                    +  printFloat(yearlyRateComp, 2) + '% Year' + compoundRateText + "</div>" ;
-			
-			var lentStr = '<div class="progress col"><div class="progress-bar bg-success" role="progressbar" aria-valuenow="'+printFloat(lentPerc, 2)+'" aria-valuemin="0" aria-valuemax="100" style="width:'+printFloat(lentPerc, 2)+'%">'+printFloat(lentPerc, 2)+'</div></div>';
-			
-			var card= '<div class="card" style="width:100%"><div class="card-header row">';
-			
-			var header = '<span class="col" style="text-align:left">' + exchangeicon(exchange,true) + coinicon(displayCurrency) + '</span>' + lentStr + '<span style="text-align:center;white-space:nowrap;" class="col hidden-sm-down">Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + mincoincheck(exchange,displayCurrency,printFloat(totalCoins * btcMultiplier, 4)) + ' (' + printFloat(lentPerc, 2) + '%)</span>' + '<span class="fa fa-chevron-down col" style="text-align:center;display:'+detaildown+'" ></span><span class="fa fa-chevron-up col" style="text-align:center;display:'+detailup+'" ></span>';
             
-			if(localStorage.getItem(displayCurrency) == "true") {
+            var lentStr = '<div class="progress col"><div class="progress-bar bg-success" role="progressbar" aria-valuenow="'+printFloat(lentPerc, 2)+'" aria-valuemin="0" aria-valuemax="100" style="width:'+printFloat(lentPerc, 2)+'%">'+printFloat(lentPerc, 2)+'</div></div>';
+            
+            var card= '<div class="card" style="width:100%"><div class="card-header row">';
+            
+            var header = '<span class="col" style="text-align:left">' + exchangeicon(exchange,true) + coinicon(displayCurrency) + '</span>' + lentStr + '<span style="text-align:center;white-space:nowrap;" class="col hidden-sm-down">Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + mincoincheck(exchange,displayCurrency,printFloat(totalCoins * btcMultiplier, 4)) + ' (' + printFloat(lentPerc, 2) + '%)</span>' + '<span class="fa fa-chevron-down col" style="text-align:center;display:'+detaildown+'" ></span><span class="fa fa-chevron-up col" style="text-align:center;display:'+detailup+'" ></span>';
+            
+            if(localStorage.getItem(displayCurrency) == "true") {
                var dropdown = '</div><div class="card-block coindetails row ' + displayCurrency + '">' + earnings + earningsSummaryCoin + calculation +  '</div></div>';
             } else {
                var dropdown = '</div><div class="card-block coindetails row ' + displayCurrency + '" style="display:none">' + earnings + earningsSummaryCoin + calculation + '</div></div>';
             }
 
-			coinlist += '<div class="row  justify-content-md-center" >' + card + header + dropdown + '</div>';
+            coinlist += '<div class="row  justify-content-md-center" >' + card + header + dropdown + '</div>';
             
         }
-		
+        
 }}
 
    $('#coindetails').html(coinlist);
    
    $.each(loanarray,function(key,value){
-	   $('.loanfilter').append("<option value=\""+key+"\">"+key+"</option>");
+       $('.loanfilter').append("<option value=\""+key+"\">"+key+"</option>");
    });
    
-	if ( $.fn.dataTable.isDataTable( '#openloans' ) ) {
+    if ( $.fn.dataTable.isDataTable( '#openloans' ) ) {
        mydatatable = $('#openloans').DataTable().columns.adjust().draw( false );
     }
     else if (dataSet.length > 0) {
@@ -459,7 +459,7 @@ for (exchange in rawData) {
             earnings += timespan.formatEarnings( summaryCoin, totalBTCEarnings[timespan.name] * summaryCoinRate);
             
         });
-		$('#coindetails').prepend("<div style='margin-top:20px;margin-bottom:20px;'>Estimated Earnings <br/>" + earnings + "</div>");
+        $('#coindetails').prepend("<div style='margin-top:20px;margin-bottom:20px;'>Estimated Earnings <br/>" + earnings + "</div>");
     }
     
     
@@ -482,40 +482,40 @@ function loadData() {
     } else {
         // expect the botlog.json to be in the same folder on the webserver -> https://github.com/BitBotFactory/poloniexlendingbot/pull/435/files
         var file = ['botlog.json','botlog2.json'];
-			$.getJSON(file[1], function (seconddata) {
-				$.getJSON(file[0], function (data) {
-					var firstdata = data["raw_data"];
-					delete data["raw_data"];
-					data["raw_data"] = {};
-					data["raw_data"][data["exchange"]] = firstdata;	
-					data["raw_data"][seconddata["exchange"]] = seconddata["raw_data"];
-					
-					var firstlog = data["log"];
-					delete data["log"];
-					data["log"] = {};
-					data["log"][data["exchange"]] = firstlog;
-					data["log"][seconddata["exchange"]] = seconddata["log"];
-					delete data["exchange"];
-				    updateJson(data);
-				     //reload every 30sec
-				    setTimeout('loadData()', refreshRate * 1000)
-			    }).fail( function(d, textStatus, error) {
-				   $('#status').text("getJSON failed, status: " + textStatus + ", error: "+error);
-				   // retry after 60sec
-				   setTimeout('loadData()', 60000)
-			    });
+            $.getJSON(file[1], function (seconddata) {
+                $.getJSON(file[0], function (data) {
+                    var firstdata = data["raw_data"];
+                    delete data["raw_data"];
+                    data["raw_data"] = {};
+                    data["raw_data"][data["exchange"]] = firstdata; 
+                    data["raw_data"][seconddata["exchange"]] = seconddata["raw_data"];
+                    
+                    var firstlog = data["log"];
+                    delete data["log"];
+                    data["log"] = {};
+                    data["log"][data["exchange"]] = firstlog;
+                    data["log"][seconddata["exchange"]] = seconddata["log"];
+                    delete data["exchange"];
+                    updateJson(data);
+                     //reload every 30sec
+                    setTimeout('loadData()', refreshRate * 1000)
+                }).fail( function(d, textStatus, error) {
+                   $('#status').text("getJSON failed, status: " + textStatus + ", error: "+error);
+                   // retry after 60sec
+                   setTimeout('loadData()', 60000)
+                });
         }).fail(function(){
-		     $.getJSON(file[0], function (data) {
-				updateJson(data);
-				// reload every 30sec
-				setTimeout('loadData()', refreshRate * 1000);
-			 }).fail( function(d, textStatus, error) {
-				$('#status').text("getJSON failed, status: " + textStatus + ", error: "+error);
-				// retry after 60sec
-				setTimeout('loadData()', 60000)
-			});
-		})
-	}
+             $.getJSON(file[0], function (data) {
+                updateJson(data);
+                // reload every 30sec
+                setTimeout('loadData()', refreshRate * 1000);
+             }).fail( function(d, textStatus, error) {
+                $('#status').text("getJSON failed, status: " + textStatus + ", error: "+error);
+                // retry after 60sec
+                setTimeout('loadData()', 60000)
+            });
+        })
+    }
 }
 
 function Timespan(name, multiplier) {
@@ -657,14 +657,14 @@ $('input.switchradio,input.logswitch').on('switchChange.bootstrapSwitch', functi
 
 $('input.logswitch').on('switchChange.bootstrapSwitch', function (event, state) {
     if(this.id){
-		if($.fn.dataTable.isDataTable( '#logtable' )){
-			
-			var searchstring = [];
-		   $('input.logswitch').each(function(){
-			   if ($(this).bootstrapSwitch('state')) {searchstring.push($(this).data("off-text"));}
-		   })
-		   if($('.exchangefilter').val()) {searchstring.push($('.exchangefilter').val())};
-		   searchstring = searchstring.toString().replace(/,/g,"|");
+        if($.fn.dataTable.isDataTable( '#logtable' )){
+            
+            var searchstring = [];
+           $('input.logswitch').each(function(){
+               if ($(this).bootstrapSwitch('state')) {searchstring.push($(this).data("off-text"));}
+           })
+           if($('.exchangefilter').val()) {searchstring.push($('.exchangefilter').val())};
+           searchstring = searchstring.toString().replace(/,/g,"|");
            logtable.columns( 1 ).search(searchstring,true).draw(false);
         } 
     }   
@@ -672,20 +672,20 @@ $('input.logswitch').on('switchChange.bootstrapSwitch', function (event, state) 
 
 $('#dropdownMenuButton').on('change', function() {
   if($.fn.dataTable.isDataTable( '#logtable' )){
-	  logtable.columns( 0 ).search(this.value).draw(false);
+      logtable.columns( 0 ).search(this.value).draw(false);
   } 
 })
 
 $('.loanfilter').on('change', function() {
   if($.fn.dataTable.isDataTable( '#openloans' )){
-	  mydatatable.columns( 1 ).search(this.value).draw(false);
+      mydatatable.columns( 1 ).search(this.value).draw(false);
   } 
 })
 
 
 $('#coinstatustable tbody').on('click', '.coinforecast', function () {
         var data = cointable.row( $(this).closest('tr') ).data();
-		coinforecast(data[2].split("> ")[1] || data[2],data[3],$(data[1]).text());
+        coinforecast(data[2].split("> ")[1] || data[2],data[3],$(data[1]).text());
     } );
 
 }
@@ -755,7 +755,7 @@ function coindetails(param,coin,status) {
         $(param).siblings('.fa').toggle();
       }
 
-	  
+      
 //Coin-Forecast
 var ctx = $("#myChart");
 var chart = "";
@@ -850,12 +850,12 @@ $(document).ready(function () {
        localStorage.setItem("displayCurrencyRate",$(this).data("value"));
        window.location.reload(true);
     });
-	
-	$(document).on('click','.fa-chevron-up,.fa-chevron-down',function(){
-	   $(this).toggle().siblings('.fa').toggle();
-	   $(this).closest('.card').find('.coindetails').toggle();
-	})
-	
-	
-	
+    
+    $(document).on('click','.fa-chevron-up,.fa-chevron-down',function(){
+       $(this).toggle().siblings('.fa').toggle();
+       $(this).closest('.card').find('.coindetails').toggle();
+    })
+    
+    
+    
 });
