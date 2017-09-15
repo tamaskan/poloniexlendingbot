@@ -24,303 +24,25 @@ var Satoshi = new BTCDisplayUnit("Satoshi", 100000000);
 var displayUnit = BTC;
 var btcDisplayUnitsModes = [BTC, mBTC, Bits, Satoshi];
 
-// Date Format
-var dateformat = localStorage.getItem('dateformat') || 'DD. M. YYYY H:mm:ss ';
-var Jsondata;
-var accounttotal;
-
-//Chart Initialisation
-var InterestDoughnutChart = new Chart(interestChart, {
-    type: 'doughnut',
-    data: {datasets: [{data: []}],labels: []}
-});
-
-var DoughnutChart = new Chart(capitalChart, {
-    type: 'doughnut',
-    data: {datasets: [{data: []}],labels: []}
-}); 
-    
-var mincoins = JSON.parse(localStorage.getItem('MinCoins')) || {'BTC':0.01,'BTS':10,'CLAM':10,'DASH':0.01,'DOGE':100,'ETH':0.01,'FCT':100,'LTC':0.01,'MAID':10,'STR':100,'XMR':0.01,'XRP':100};
-
-function mincoincheck(coin,value){
-    var response;
-    $.each(mincoins,function(key,coinvalue){
-        if(key == coin) {
-          if (value >= coinvalue) {response = value;}
-          else {response = '<a data-toggle="tooltip" style="color:red" class="plb-tooltip" title=" Minimum ' + coinvalue + ' Coins ">' + value + '</a>';}
-        }
-    })
-    return response;
-}
-   
-function updatedonut(){
-    
-       coins = [];
-       interest = [];
-       coinnames = [];
-       coincolors = [];
-       
-       $.each(Jsondata,function(key,value){
-           coins.push(value["totalCoins"]);
-           coinnames.push(key);
-           interest.push(value["totalEarnings"]);
-           
-           var $inspector = $("<i class='cc'>").css('display', 'none').addClass(key);
-            $("body").append($inspector); 
-            try {
-                coincolors.push($inspector.css('color'));
-            } finally {
-                $inspector.remove(); 
-            }   
-       })
-       
-       DoughnutChart.data.datasets[0].data = coins;
-       DoughnutChart.data.labels = coinnames;
-       DoughnutChart.data.datasets[0].backgroundColor = coincolors;
-       DoughnutChart.update();
-       
-       InterestDoughnutChart.data.datasets[0].data = interest;
-       InterestDoughnutChart.data.labels = coinnames;
-       InterestDoughnutChart.data.datasets[0].backgroundColor = coincolors;
-       InterestDoughnutChart.update();
-
-    }
-
-function notification(string,type){
-
-    if((moment().diff(moment(localStorage.getItem('last_updated')),'seconds') < ( localStorage.getItem('refreshRate') || 30)) || string.indexOf('Update') >= 0) {} else {return false;}
-    
-    if (localStorage.getItem('notificationOnUpdate')) {
-        toastr.options = {"positionClass": "toast-top-right"}
-        if(type == "success" || type == "update"){
-           toastr.success(string);
-        } else if (type == "warning") {
-           toastr.error(string);        
-        }
-        else {
-           toastr.info(string) 
-        }
-          
-    }
-    
-} 
-   
-function coinicon(string){
-    var arr = ['BTC','BTS','CLAM','DASH','DOGE','ETH','FCT','LTC','MAID','STR','XMR','XRP'];
-    var output = '';
-    for (var i = arr.length - 1; i >=0; i--) {
-        if (string.indexOf(arr[i]) >= 0) {
-            output = "<i class='cc " + arr[i] + "'></i> ";
-        }
-    }
-    return output + string;
-}   
-
-function shorttimestring(timestring){
-    if(localStorage.getItem('relativedates') == ("false" || null)){return timestring;}
-        var time = moment(timestring,'YYYY-MM-DD h:mm:ss').format(dateformat);
-        var shorttime;
-        
-        $.each(["months","weeks","days","hours","minutes","seconds"],function(key,value){
-            if (moment().diff(moment(timestring,'YYYY-MM-DD h:mm:ss'),value) >= 1) {
-               shorttime = '<a data-toggle="tooltip" data-date="'+timestring+'" class="plb-tooltip" title="' + time + '">' + moment().diff(moment(timestring,'YYYY-MM-DD h:mm:ss'),value) + ' ' + value + ' ago</a>';
-               return false;
-            }
-        })
-        
-        return shorttime;
-}
- var totalamount = 0;
- var totalearnings = 0;
- var total24hearnings = 0;
- var tempdata;
 function updateJson(data) {
-tempdata = data;
-    Jsondata = data["raw_data"];
-    totalamount = 0;
-    totalearnings = 0;
-    total24hearnings = 0;
-    $.get( "https://poloniex.com/public?command=returnTicker", function( data2 ) {
-        data2["BTC_BTC"] = {};
-     $.each(data2,function(k,v){
-      if (k.indexOf('BTC_') >=0) {
-          var coin = k.replace("BTC_","");
-          var highbid = v["highestBid"];
-          $.each(Jsondata,function(key,value){
-              
-              if (key == coin) {
-                  
-                  Jsondata[key]["highestBid"] = Jsondata[key]["highestBid"] || highbid || 1;
-                  Jsondata[key]["totalCoins"] = prettyFloat(+value["totalCoins"] || +value["maxToLend"],4);
-                  Jsondata[key]["balance"] = prettyFloat(localStorage.getItem('displayCurrencyRate') * (Jsondata[key]["totalCoins"] * value["highestBid"]),2);
-                  Jsondata[key]["interestcoin"] = Jsondata[key]["totalEarnings"] || 0;
-                  Jsondata[key]["interest24h"] = prettyFloat(+Jsondata[key]["yesterdayEarnings"],8) || 0;
-                  Jsondata[key]["interestcurrency"] = prettyFloat(Jsondata[key]["totalEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
+    $('#status').text(data.last_status);
+    $('#updated').text(data.last_update);
 
-                  if($('.cardclone').length >= (Object.keys(Jsondata).length)){
-                     
-                       $('.clone'+key +' .cardcoinlent').html('<a data-toggle="tooltip"  class="plb-tooltip" title="Lent / Total">' + (Jsondata[key]["lentSum"] || 0) + ' / ' + Jsondata[key]["totalCoins"]  + ' ' + coin + '</a>');
-                       $('.clone'+key +' .cardcointotal').html(Jsondata[key]["balance"] + ' ' + localStorage.getItem('displayCurrency'));
-                       $('.clone'+key +' .cardearned').html('<a data-toggle="tooltip"  class="plb-tooltip" title="Yesterday / Total">' + Jsondata[key]["interest24h"] +' / '+Jsondata[key]["interestcoin"] + '</a>');
-                       $('.clone'+key +' .coingriddetails').html($('.coindetails.'+key+' td:eq(1)').html());
-                       if(+value["lentSum"] > 0){
-                           $('.clone'+key +' .cardearned').html('<a style="color:#5b75dd" data-toggle="tooltip"  class="plb-tooltip" title="Yesterday / Total" onClick="coindata(\''+key+'\','+Jsondata[key]["totalCoins"]+')">' + Jsondata[key]["interest24h"] +' / '+Jsondata[key]["interestcoin"] + '</a>');
-                           $('.clone'+key +' .collapseidhref').show();} else {$('.clone'+key +' .collapseidhref').hide();
-                           }
-                       $('.updatetime').html(shorttimestring(data.last_update));
-                  }
-                  else {
-                     var template = $("#cardtemplate").clone().removeAttr("style").addClass("cardclone clone"+key);  
-                  $('.coinname',template).html(key);
-                  $('.cardcoinlent',template).html('<a data-toggle="tooltip"  class="plb-tooltip" title="Lent / Total">' + (Jsondata[key]["lentSum"] || 0) + ' / ' + Jsondata[key]["totalCoins"]  + ' ' + coin + '</a>');
-                  $('.cardcointotal',template).html(Jsondata[key]["balance"] + ' ' + localStorage.getItem('displayCurrency'));
-                  $('.cardearned',template).html('<a data-toggle="tooltip"  class="plb-tooltip" title="Yesterday / Total">' + Jsondata[key]["interest24h"] +' / '+Jsondata[key]["interestcoin"] + '</a>');
-                  $('.cc',template).addClass(key);
-                  $('.collapseidhref a',template).attr('href', '#'+key+'collapse');
-                  $('.collapseid',template).attr('id', key+'collapse'); 
-                  if(+value["lentSum"] > 0){
-                      $('.cardearned',template).html('<a style="color:#5b75dd" data-toggle="tooltip"  class="plb-tooltip" title="Yesterday / Total" onClick="coindata(\''+key+'\','+Jsondata[key]["totalCoins"]+')">' + Jsondata[key]["interest24h"] +' / '+Jsondata[key]["interestcoin"] + '</a>');
-                      $('.collapseidhref',template).show();$('.coingriddetails',template).html($('.coindetails.'+key+' td:eq(1)').html());} else {$('.collapseidhref',template).hide();
-                      }
-                     $('.cardoverview').append(template);    
-                     $('.updatetime').html(shorttimestring(data.last_update));
-                  }
-                  totalamount = +totalamount + +Jsondata[key]["balance"];
-                  totalearnings = +totalearnings + +Jsondata[key]["interestcurrency"];
-                  total24hearnings = +total24hearnings + +prettyFloat(Jsondata[key]["yesterdayEarnings"] * value["highestBid"] * localStorage.getItem('displayCurrencyRate'),2);
-              }
-          })
-      }
-    
-     });
-
-     $('#totalcash').html(prettyFloat(totalamount,2) + ' ' + localStorage.getItem('displayCurrency'));
-     $('#totalinterest').html(prettyFloat(total24hearnings,2) + ' / ' + prettyFloat(totalearnings,2) + ' ' + localStorage.getItem('displayCurrency'));
-     $('#coinstatustable tbody').empty();
-
-     $.each(Jsondata,function(key,value){
-      $('#coinstatustable').append('<tr><td>'+coinicon(key)+'</td><td>'+value["totalCoins"]+'</td><td>'+value["balance"]+'</td><td>'+value["interest24h"]+'</td><td>'+value["interestcoin"] +'</td><td>'+value["interestcurrency"]+'</td></tr>');
-     });
-     
-     updatedonut();
-     
-    });
-    
-    $('.displayCurrency').each(function(){
-        $(this).html(($(this).html().replace("$",localStorage.getItem("displayCurrency"))));
-    })
-
-    if(Object.keys(data.raw_data).length < 1){
-        $('#home,#homegrid,#oloans,#logtab').contents(':not(.loader)').hide();
-        $('.loader').show();
-        $('.updated').css("color","red").prop('title',moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
-        if(localStorage.getItem('notificationOnUpdate') == "true"){notification("Update failed","warning");}
-    } else {
-        $('.loader').hide();
-        $('.updated').css("color","green").prop('title',moment(data.last_update,'YYYY-MM-DD h:mm:ss').format(dateformat));
-        if(localStorage.getItem('notificationOnUpdate') == "true"){notification("Update successful","success");}
-        
-    }  
-    
     var rowCount = data.log.length;
-    var successnumber = 0;
-    var cancelednumber = 0;
-    var errornumber = 0;
-    var dataSet = [];
-    var logdataSet = [];
-    
-    var regexarray = [/(\d{4}[.-]\d{2}[.-]\d{2}[ ]\d{2}[:]\d{2}[:]\d{2})/,/[ ]\d{0,20}[.]\d{0,20}[ ]([A-Z]{0,10})[ ]/,/[ ](\d{0,20}[.]\d{0,20})[ ]/,/\bfor?\b[ ](\d{0,3}[ ]\bdays?\b)/,/(\d{0,4}[.]\d{0,18})[%]/];
+    var table = $('#logtable');
+    table.empty();
     for (var i = rowCount - 1; i >=0; i--) {
-        
-    if((data.log[i]).indexOf("min_loan_size") >= 0){
-       var coinobject = ((data.log[i]).match(/([A-Z]{0,5})'/))[1];
-       var coinamountobject = ((data.log[i]).match(/: (\d{1,4}[\.]*\d*)/))[1];
-       if(mincoins[coinobject] != coinamountobject) {
-           mincoins[coinobject] = coinamountobject;
-           localStorage.setItem("MinCoins",JSON.stringify(mincoins));
-        };
-    }   
-        
-        var timestring = shorttimestring(((data.log[i]).match(regexarray[0]))[1]);
-        localStorage.setItem('last_updated',((data.log[i]).match(regexarray[0]))[1]);
-        
-        var message = (data.log[i]).replace(((data.log[i]).match(regexarray[0]))[1],"");
-
-        if (data.log[i].indexOf("Error") >= 0) {
-            if (localStorage.getItem('notificationOnError') == "true"){notification(message,"warning");}
-            message = '<span data-type="table-danger">' + message + '</span>';
-            errornumber++;
-            if($('.btn-danger').hasClass('disabled'))  {} else {logdataSet.push(["Error",timestring,message.replace("Error: ","")]);}
-            
-        }
-        else if (data.log[i].indexOf("Placing") >= 0) {
-            if (localStorage.getItem('notificationOnLoan') == "true"){notification(message,"success");}
-            message = '<span data-type="table-success">' +  coinicon(message) + '</span>';
-            successnumber++;
-            
-            var resultarray = [];
-            $.each(regexarray,function(index,value){
-                resultarray.push(((data.log[i]).match(regexarray[index])[1]));
-            });
-            
-            dataSet.push([shorttimestring(resultarray[0]),coinicon(resultarray[1]),prettyFloat(+resultarray[2],4),resultarray[3],prettyFloat(+resultarray[4],4) + ' %']);
-            
-            if($('.btn-success').hasClass('disabled')) {} else {logdataSet.push(["Success",timestring,message]);}
-            
-        }
-        else if (data.log[i].indexOf("Canceling") >= 0) {
-            message = '<span data-type="table-info">' + message + '</span>';
-            if($('.btn-info').hasClass('disabled'))  {} else {logdataSet.push(["Info",timestring,message]);}
-            cancelednumber++;
-            
-        }
-        else {
-            message = '<span data-type="table-custom">' +  coinicon(message) + '</span>';
-            if($('.infobutton').hasClass('disabled'))  {} else {logdataSet.push(["Info",timestring,message]);}
-        }
-        
-        
-        $('#successnumber').text(successnumber);
-        $('#cancelednumber').text(cancelednumber);
-        $('#errornumber').text(errornumber);
-        $('#infonumber').text(data.log.length - (successnumber + cancelednumber + errornumber));
-       
+        table.append($('<tr/>').append($('<td colspan="2" />').text(data.log[i])));
     }
 
     updateOutputCurrency(data.outputCurrency);
     updateRawValues(data.raw_data);
-    
-    if ( $.fn.dataTable.isDataTable( '#openloans' ) ) {
-       mydatatable = $('#openloans').dataTable();
-    }
-    else {
-       mydatatable = $('#openloans').dataTable({responsive: true,createdRow: function( row, data, dataIndex ) {
-          $( row ).find('tr').addClass($( row ).find('td:eq(2) span').attr('data-type'));
-        }});
-    }
-
-    mydatatable.fnClearTable();
-    if(dataSet.length > 0){mydatatable.fnAddData(dataSet);}
-    
-    if ( $.fn.dataTable.isDataTable( '#logtable' ) ) {
-       logtable = $('#logtable').dataTable();
-    }
-    else {
-       logtable = $('#logtable').dataTable({responsive: true,createdRow: function( row, data, dataIndex ) {
-          $( row ).find('td:eq(1) a').attr('data-order',$( row ).find('td:eq(1) a').attr('data-date'));
-          $( row ).addClass($( row ).find('td:eq(2) span').attr('data-type'));        
-        }});
-    }
-
-    logtable.fnClearTable();
-    if(logdataSet.length > 0){logtable.fnAddData(logdataSet);}
-    logtable.fnAdjustColumnSizing();
 }
 
 function updateOutputCurrency(outputCurrency){
     var OutCurr = Object.keys(outputCurrency);
-    summaryCoin = localStorage.getItem('displayCurrency') || outputCurrency['currency'];
-    summaryCoinRate = parseFloat(localStorage.getItem('displayCurrencyRate') || outputCurrency['highestBid']);
+    summaryCoin = outputCurrency['currency'];
+    summaryCoinRate = parseFloat(outputCurrency['highestBid']);
     // switch between using outputCoin for summary only or all lending coins earnings
     if(outputCurrencyDisplayMode == 'all') {
         earningsOutputCoin = summaryCoin;
@@ -352,15 +74,13 @@ function updateRawValues(rawData){
     table.innerHTML = "";
     var currencies = Object.keys(rawData);
     var totalBTCEarnings = {};
-
-    $('#cointable tbody').empty();
     for (var keyIndex = 0; keyIndex < currencies.length; ++keyIndex)
     {
         var currency = currencies[keyIndex];
         var btcMultiplier = currency == 'BTC' ? displayUnit.multiplier : 1;
         var averageLendingRate = parseFloat(rawData[currency]['averageLendingRate']);
         var lentSum = parseFloat(rawData[currency]['lentSum']);
-        var totalCoins = parseFloat(rawData[currency]['totalCoins'] || rawData[currency]['maxToLend']);
+        var totalCoins = parseFloat(rawData[currency]['totalCoins']);
         var maxToLend = parseFloat(rawData[currency]['maxToLend']);
         var highestBidBTC = parseFloat(rawData[currency]['highestBid']);
 
@@ -374,7 +94,10 @@ function updateRawValues(rawData){
         if (!isNaN(averageLendingRate) && !isNaN(lentSum) || !isNaN(totalCoins))
         {
 
-            
+            // cover cases where totalCoins isn't updated because all coins are lent
+            if (isNaN(totalCoins) && !isNaN(lentSum)) {
+                totalCoins = lentSum;
+            }
             var rate = +averageLendingRate  * 0.85 / 100; // 15% goes to Poloniex fees
 
             var earnings = '';
@@ -419,33 +142,21 @@ function updateRawValues(rawData){
             else
                 effRateText = makeTooltip("Effective loan rate, considering poloniex 15% fee.", "Eff.");
             var compoundRateText = makeTooltip("Compound rate, the result of reinvesting the interest.", "Comp.");
+            var lentStr = 'Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + printFloat(totalCoins * btcMultiplier, 4) + ' (' + printFloat(lentPerc, 2) + '%)';
+
+            if (totalCoins != maxToLend) {
+                lentStr += ' <b>Total</b><br/>Lent ' + printFloat(lentSum * btcMultiplier, 4) + ' of ' + printFloat(maxToLend * btcMultiplier, 4) + ' (' + printFloat(lentPercLendable, 2) + '%) <b>Lendable</b>';
+            }
+
             var displayCurrency = currency == 'BTC' ? displayUnit.name : currency;
-               
-            if(yearlyRateComp > 0){
-                localStorage.setItem('yearlyrate'+currency,(+localStorage.getItem('yearlyrate'+currency) + printFloat(yearlyRateComp, 2) / 2));
-            } else {
-                yearlyRateComp = localStorage.getItem('yearlyrate'+currency);
-            }
-            
-            if(printFloat(yearlyRateComp, 2) > 0){$('#cointable').append('<tr><td>'+coinicon(currency)+'</td><td>'+ prettyFloat(yearlyRateComp, 2) +'</td></tr>')};  
-            
-            var lentStr = '<div class="progress" style="margin-bottom:20px"><div class="progress-bar bg-success" role="progressbar" aria-valuenow="'+printFloat(lentPerc, 2)+'" aria-valuemin="0" aria-valuemax="100" style="width:'+printFloat(lentPerc, 2)+'%">'+printFloat(lentPerc, 2)+'</div></div><p style="text-align:center">Lent ' + printFloat(lentSum * btcMultiplier, 4) +' of ' + mincoincheck(displayCurrency,printFloat(totalCoins * btcMultiplier, 4)) + ' (' + printFloat(lentPerc, 2) + '%)</p>';
-                       
-            if (lentSum > 0) {
-               var detaildown = (localStorage.getItem(displayCurrency) == "true") ? 'none' : '';
-               var detailup = (localStorage.getItem(displayCurrency) == "true") ? '' : 'none';
-               var currencyStr = "<i class='cc " + displayCurrency + "'></i> " + displayCurrency + ' <span class="fa fa-chevron-down" onClick="coindetails(this,\''+displayCurrency+'\',\'true\')" aria-hidden="true" style="display:'+detaildown+'"></span><span class="fa fa-chevron-up " onClick="coindetails(this,\''+displayCurrency+'\',\'false\')" aria-hidden="true" style="display:'+detailup+'"></span>';
-            } else {
-               var currencyStr = "<i class='cc " + displayCurrency + "'></i> " + displayCurrency;   
-            }
+            var currencyStr = "<b>" + displayCurrency + "</b>";
             if(!isNaN(highestBidBTC) && earningsOutputCoin != currency) {
-                var coinvalue = 'Total: ' + Math.round(prettyFloat(earningsOutputCoinRate * highestBidBTC / btcMultiplier , 4) * printFloat(totalCoins * btcMultiplier, 4)) + ' ' + earningsOutputCoin;
-                currencyStr += "<br/>1 "+ displayCurrency + " = " + prettyFloat(earningsOutputCoinRate * highestBidBTC / btcMultiplier , 2)  + ' ' + earningsOutputCoin + '<br/>' +coinvalue;
+                currencyStr += "<br/>1 "+ displayCurrency + " = " + prettyFloat(earningsOutputCoinRate * highestBidBTC / btcMultiplier , 2) + ' ' + earningsOutputCoin;
             }
             var rowValues = [currencyStr, lentStr,
-                "<div class='inlinediv hidden-md-down' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
+                "<div class='inlinediv' >" + printFloat(averageLendingRate, 5) + '% Day' + avgRateText + '<br/>'
                     + printFloat(effectiveRate, 5) + '% Day' + effRateText + '<br/></div>'
-                    + "<div class='inlinediv hidden-md-down' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
+                    + "<div class='inlinediv' >" + printFloat(yearlyRate, 2) + '% Year<br/>'
                     +  printFloat(yearlyRateComp, 2) + '% Year' + compoundRateText + "</div>" ];
 
             // print coin status
@@ -453,7 +164,7 @@ function updateRawValues(rawData){
             for (var i = 0; i < rowValues.length; ++i) {
                 var cell = row.appendChild(document.createElement("td"));
                 cell.innerHTML = rowValues[i];
-                cell.style.verticalAlign = "";
+                cell.style.verticalAlign = "text-top";
                 if (i == 0) {
                     cell.setAttribute("width", "20%");
                 }
@@ -463,17 +174,9 @@ function updateRawValues(rawData){
             var earningsColspan = rowValues.length - 1;
             // print coin earnings
             var row = table.insertRow();
-            row.className = 'coindetails '+displayCurrency;
-            
-            if(localStorage.getItem(displayCurrency) == "true") {
-               row.style.display = "";   
-            } else {
-               row.style.display = "none";
-            }
-            
             if (lentSum > 0) {
                 var cell1 = row.appendChild(document.createElement("td"));
-                cell1.innerHTML = "<span class='hidden-md-down'>"+ displayCurrency +"<br/></span>Est. "+ compoundRateText +"<br/>Earnings";
+                cell1.innerHTML = "<span class='hidden-xs'>"+ displayCurrency +"<br/></span>Est. "+ compoundRateText +"<br/>Earnings";
                 var cell2 = row.appendChild(document.createElement("td"));
                 cell2.setAttribute("colspan", earningsColspan);
                 if (earningsSummaryCoin != '') {
@@ -481,10 +184,7 @@ function updateRawValues(rawData){
                 } else {
                     cell2.innerHTML = "<div class='inlinediv' >" + earnings + "</div>";
                 }
-                
             }
-            
-            
         }
     }
 
@@ -496,19 +196,15 @@ function updateRawValues(rawData){
         earnings = '';
         timespans.forEach(function(timespan) {
             earnings += timespan.formatEarnings( summaryCoin, totalBTCEarnings[timespan.name] * summaryCoinRate);
-            
         });
         var row = thead.insertRow(0);
         var cell = row.appendChild(document.createElement("th"));
-        cell.innerHTML = "Estimated<br/>Earnings";
+        cell.innerHTML = "Account<br/>Estimated<br/>Earnings";
         cell.style.verticalAlign = "text-top";
         cell = row.appendChild(document.createElement("th"));
         cell.setAttribute("colspan", 2);
         cell.innerHTML = earnings;
     }
-    
-    
-
 }
 
 function handleLocalFile(file) {
@@ -551,7 +247,7 @@ function Timespan(name, multiplier) {
         } else {
             var currencyClass = '';
             if (minimize_currency_xs) {
-                currencyClass = 'hidden-md-down';
+                currencyClass = 'hidden-xs';
             }
             if (currency == "BTC") {
                 return displayUnit.formatValue(earnings) + " <span class=" + currencyClass + ">" + displayUnit.name + "</span> / " + name + "<br/>"
@@ -591,7 +287,7 @@ function setEffRateMode() {
     }
     localStorage.effRateMode = effRateMode;
     $("input[name='effRateMode'][value='"+ effRateMode +"']").prop('checked', true);;
-    //console.log('Effective rate mode: ' + effRateMode);
+    console.log('Effective rate mode: ' + effRateMode);
 }
 
 function setBTCDisplayUnit() {
@@ -616,7 +312,7 @@ function setBTCDisplayUnit() {
             localStorage.displayUnitText = displayUnitText;
         }
     })
-    //console.log('displayUnitText: ' + displayUnitText);
+    console.log('displayUnitText: ' + displayUnitText);
 }
 
 function setOutputCurrencyDisplayMode() {
@@ -639,7 +335,7 @@ function setOutputCurrencyDisplayMode() {
             localStorage.outputCurrencyDisplayModeText = outputCurrencyDisplayModeText;
         }
     })
-    //console.log('outputCurrencyDisplayMode: ' + outputCurrencyDisplayModeText);
+    console.log('outputCurrencyDisplayMode: ' + outputCurrencyDisplayModeText);
 
 }
 
@@ -648,12 +344,9 @@ function loadSettings() {
     refreshRate = localStorage.getItem('refreshRate') || 30
     $('#refresh_interval').val(refreshRate)
 
-    //Date Format
-    $('#dateformat').val(localStorage.getItem('dateformat') || "YYYY-MM-DD h:mm:ss")
-    
     // Time spans
     var timespanNames = JSON.parse(localStorage.getItem('timespanNames')) || ["Year", "Month", "Week", "Day", "Hour"]
-    
+
     timespans = [Year, Month, Week, Day, Hour].filter(function(t) {
         // filters out timespans not specified
         return timespanNames.indexOf(t.name) !== -1;
@@ -662,39 +355,18 @@ function loadSettings() {
     timespanNames.forEach(function(t) {
         $('input[data-timespan="' + t + '"]').prop('checked', true);
     });
-    
-    
-
-$('input.switchradio').each(function(key,value){
-    if(value.id){
-            $("#"+value.id).bootstrapSwitch('state',localStorage.getItem(this.id) || false);
-    }   
-})
-    
-$('input.switchradio').on('switchChange.bootstrapSwitch', function (event, state) {
-    if(this.id){
-        console.log(this.id,$("#"+this.id).bootstrapSwitch('state'));
-        localStorage.setItem(this.id,$("#"+this.id).bootstrapSwitch('state'));
-    }
-    
-});
- 
-
 }
 
 function doSave() {
     // Validation
     var tempRefreshRate = $('#refresh_interval').val()
-    if(tempRefreshRate < 10 || tempRefreshRate > 3600) {
-        alert('Please input a value between 10 and 3600 for refresh rate')
+    if(tempRefreshRate < 10 || tempRefreshRate > 60) {
+        alert('Please input a value between 10 and 60 for refresh rate')
         return false
     }
 
     // Refresh rate
     localStorage.setItem('refreshRate', tempRefreshRate)
-    
-    // Date Format
-    localStorage.setItem('dateformat', $('#dateformat').val())
 
     // Time spans
     var timespanNames = [];
@@ -723,7 +395,8 @@ function doSave() {
         effRateMode = localStorage.effRateMode;
     }
 
-    notification("Settings saved!","success");
+    toastr.success("Settings saved!");
+    $('#settings_modal').modal('hide');
 
     // Now we actually *use* these settings!
     update();
@@ -750,76 +423,6 @@ function bsNavbarBugWorkaround() {
     });
 }
 
-function coindetails(param,coin,status) {
-        localStorage.setItem(coin,status);
-        $(param).parent().parent().next('.coindetails').toggle();
-        $(param).hide();
-        $(param).siblings('.fa').toggle();
-      }
-
-var ctx = $("#myChart");
-var chart = "";
-
-function coindata(coinname,amount){ 
-
-var coin = "BTC";
-var rate = 0;
-$("#cointable tr").each(function() {
-  $this = $(this);
-   if (($this.find("td").text()).indexOf(coin) >= 0) {
-    rate = ($this.find("td").text()).replace(coin,"");
-   }
-  
-});
-
-var coind = [];
-var year = moment().year();
-var yeararray = [];
-for (var n = 0; n < 5; ++ n) {
-   coind[n] = parseFloat(amount + (amount * (rate / 100)));
-   amount = coind[n];
-   year = year + 1;
-   yeararray.push(year);
-} 
-
-            var $inspector = $("<i class='cc'>").css('display', 'none').addClass(coinname);
-            $("body").append($inspector); 
-            try {
-                coincolor = $inspector.css('color');
-            } finally {
-                $inspector.remove(); 
-            }
-            
-data = { labels: yeararray,datasets: [{
-                    label: coinname,
-                    backgroundColor: coincolor,
-                    borderColor: coincolor,
-                    data: coind,
-                    fill: false,
-                }] };
-                
-
-
-chart = new Chart(ctx, {
-    type: 'line',
-    data: data,
-    options: {
-        scales: {
-            xAxes: [{
-                time: {
-                    unit: 'month'
-                },
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Date'
-                        }
-            }]
-        }
-    }
-})
-$('#myModal').modal('toggle');
-}     
-      
 $(document).ready(function () {
     toastr.options = {
         "positionClass": "toast-top-center"
@@ -827,74 +430,4 @@ $(document).ready(function () {
 
     update();
     bsNavbarBugWorkaround();
-    
-    $('.toggle').click(function(){
-        $(this).hide();
-        $(this).siblings().toggle();
-        $(this).parent().next('.panel-body').toggle();
-    });
-
-    $( ".btn-success" ).click(function() {
-        $(this).toggleClass("disabled");
-        updateJson(tempdata);
-    });
-    
-    $( ".btn-info" ).click(function() {
-        $(this).toggleClass("disabled");
-        updateJson(tempdata);   
-    });
-    
-    $( ".btn-danger" ).click(function() {
-        $(this).toggleClass("disabled");
-        updateJson(tempdata);   
-    });
-    
-    $( ".infobutton" ).click(function() {
-        $(this).toggleClass("disabled");
-        updateJson(tempdata); 
-    });     
-    
-    $('#dropdownMenuLink').html(localStorage.getItem('displayCurrency'));
-    
-    $('a[data-toggle="tab"]').on('show.bs.tab', function(e) {
-        localStorage.setItem('activeTab', $(e.target).attr('href'));
-    });
-    
-    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-     if($(e.target).attr("href") == "#logtab"){
-         $( document ).ready(function() {
-                if($.fn.dataTable.isDataTable( '#logtable' )){
-                    logtable.fnAdjustColumnSizing();
-                }    
-             });
-     } 
-    })
-
-    var activeTab = localStorage.getItem('activeTab');
-    if(activeTab){
-        $('#navbarNav a[href="' + activeTab + '"]').tab('show');
-    }
-    
-    jQuery(".switchradio").bootstrapSwitch();
-    
-    $.get( "https://blockchain.info/ticker?cors=true", function( data ) {
-     $.each(data,function(v,m){
-      $('#currencydropdown').append('<a class="dropdown-item" href="#" data-name="'+v+'" data-value="'+m['last']+'">'+v+'</a>');
-     });
-    });
-    
-    localStorage.setItem("displayCurrency",localStorage.getItem("displayCurrency") || "BTC");
-    localStorage.setItem("displayCurrencyRate",localStorage.getItem("displayCurrencyRate") || 1);
-    
-    $(document.body).on('click',".dropdown-item",function(){
-       localStorage.setItem("displayCurrency",$(this).data("name"));
-       localStorage.setItem("displayCurrencyRate",$(this).data("value"));
-       window.location.reload(true);
-    });
-    
-    
-
-
 });
-
-

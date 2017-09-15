@@ -72,3 +72,5 @@
 		.marginzero {margin-bottom:0;}
 		.chartstyle {width:300px;height:400px;}
 		.cardicon {font-size:50px;text-align:center;padding-top:1.25rem;display:block}
+		
+		.bootstrap-switch .bootstrap-switch-handle-off, .bootstrap-switch .bootstrap-switch-handle-on, .bootstrap-switch .bootstrap-switch-label {padding:8px 12px;}
